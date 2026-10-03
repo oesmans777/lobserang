@@ -69,60 +69,68 @@ export const PaymentKasView: React.FC<PaymentKasViewProps> = ({
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between border-b border-slate-200 pb-3">
-        <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2">
-          💰 Rekapitulasi Kas & Shuttlecock
+      <div className="flex items-center justify-between border-b border-[#B2DCE5] pb-3">
+        <h2 className="text-xl font-black text-[#013A40] flex items-center gap-2 font-sporty uppercase italic">
+          <span className="text-2xl text-[#F8B700]">💰</span>
+          <span>Rekapitulasi Kas & Shuttlecock</span>
         </h2>
       </div>
 
       {/* SUMMARY KAS */}
-      <div className="bg-sky-50 border border-sky-200 rounded-xl p-5 shadow-xs space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center border-b-2 border-dashed border-sky-200 pb-4">
-          <div className="bg-white/80 p-3 rounded-lg border border-sky-100">
-            <span className="text-emerald-600 font-bold text-xs uppercase tracking-wider block">💵 Kas Tunai</span>
-            <span className="text-base font-extrabold text-slate-800 mt-1 block">
+      <div className="bg-white border-2 border-[#038C8C]/30 shape-cyber-card p-5 sm:p-6 shadow-sm space-y-5 relative overflow-hidden">
+        {/* Futuristic Ambient Glow */}
+        <div className="absolute top-0 right-0 w-44 h-44 bg-[#B2DCE5]/25 rounded-full blur-3xl pointer-events-none -mr-12 -mt-12"></div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center border-b-2 border-dashed border-[#B2DCE5] pb-5 relative z-10">
+          <div className="bg-[#F2F2F2] p-3.5 shape-cyber-card border border-[#B2DCE5]">
+            <span className="text-[#038C8C] font-black text-xs uppercase tracking-wider block font-tech">💵 Kas Tunai</span>
+            <span className="text-lg font-black text-[#013A40] mt-1 block">
               Rp {totalTunai.toLocaleString('id-ID')}
             </span>
-            <span className="text-[11px] text-slate-500 font-semibold">({countTunai} Orang)</span>
+            <span className="text-[11px] text-[#013A40]/70 font-bold">({countTunai} Orang)</span>
           </div>
 
-          <div className="bg-white/80 p-3 rounded-lg border border-sky-100">
-            <span className="text-blue-600 font-bold text-xs uppercase tracking-wider block">📱 QRIS / Transfer</span>
-            <span className="text-base font-extrabold text-slate-800 mt-1 block">
+          <div className="bg-[#F2F2F2] p-3.5 shape-cyber-card border border-[#B2DCE5]">
+            <span className="text-[#013A40] font-black text-xs uppercase tracking-wider block font-tech">📱 QRIS / Transfer</span>
+            <span className="text-lg font-black text-[#013A40] mt-1 block">
               Rp {totalTF.toLocaleString('id-ID')}
             </span>
-            <span className="text-[11px] text-slate-500 font-semibold">({countTF} Orang)</span>
+            <span className="text-[11px] text-[#013A40]/70 font-bold">({countTF} Orang)</span>
           </div>
 
-          <div className="bg-white/80 p-3 rounded-lg border border-sky-100">
-            <span className="text-red-600 font-bold text-xs uppercase tracking-wider block">⏳ Belum Bayar</span>
-            <span className="text-base font-extrabold text-slate-800 mt-1 block">
+          <div className="bg-[#F2F2F2] p-3.5 shape-cyber-card border border-[#B2DCE5]">
+            <span className="text-red-600 font-black text-xs uppercase tracking-wider block font-tech">⏳ Belum Bayar</span>
+            <span className="text-lg font-black text-[#013A40] mt-1 block">
               Rp {totalBelum.toLocaleString('id-ID')}
             </span>
-            <span className="text-[11px] text-slate-500 font-semibold">({countBelum} Orang)</span>
+            <span className="text-[11px] text-[#013A40]/70 font-bold">({countBelum} Orang)</span>
           </div>
         </div>
 
-        <div className="text-center font-black text-lg text-blue-900">
-          💰 Total Kas Bersih Masuk: Rp {totalBersihMasuk.toLocaleString('id-ID')}
+        <div className="text-center font-black text-xl text-[#013A40] relative z-10 flex items-center justify-center gap-2">
+          <span>💰</span>
+          <span>Total Kas Bersih Masuk:</span>
+          <span className="text-[#038C8C] bg-[#B2DCE5]/40 px-3 py-0.5 shape-cyber-pill border border-[#038C8C]/30">
+            Rp {totalBersihMasuk.toLocaleString('id-ID')}
+          </span>
         </div>
 
-        <div className="flex justify-around flex-wrap gap-2 text-xs font-semibold text-slate-600 pt-2 border-t border-sky-200/60">
-          <span>Total Member: <b className="text-slate-900">{kehadiranList.length}</b></span>
-          <span>Hadir Mabar: <b className="text-slate-900">{kehadiranList.filter(k => k.status_hadir).length}</b></span>
-          <span>Sudah Bayar: <b className="text-emerald-700">{countTunai + countTF}</b></span>
-          <span>Sponsor/Free: <b className="text-amber-700">{countSponsor}</b></span>
-          <span>Shuttlecock Tambahan: <b className="text-purple-700">{totalExtraCock} Pcs</b></span>
+        <div className="flex justify-around flex-wrap gap-2 text-xs font-bold text-[#013A40]/80 pt-3 border-t border-[#B2DCE5]/70 relative z-10">
+          <span>Total Member: <b className="text-[#013A40]">{kehadiranList.length}</b></span>
+          <span>Hadir Mabar: <b className="text-[#038C8C]">{kehadiranList.filter(k => k.status_hadir).length}</b></span>
+          <span>Sudah Bayar: <b className="text-[#038C8C]">{countTunai + countTF}</b></span>
+          <span>Sponsor/Free: <b className="text-[#F8B700]">{countSponsor}</b></span>
+          <span>Shuttlecock Tambahan: <b className="text-[#013A40]">{totalExtraCock} Pcs</b></span>
         </div>
       </div>
 
       {/* FILTER */}
       <div className="flex items-center gap-2.5">
-        <span className="text-xs font-bold text-slate-600">Tampilkan Data:</span>
+        <span className="text-xs font-black text-[#013A40] uppercase tracking-wider font-tech">Filter Data:</span>
         <select
           value={filterKas}
           onChange={e => setFilterKas(e.target.value)}
-          className="px-3 py-1.5 bg-white border border-slate-300 rounded-lg text-xs font-bold text-slate-700 cursor-pointer shadow-2xs focus:outline-hidden"
+          className="px-3.5 py-1.5 bg-white border border-[#B2DCE5] focus:border-[#038C8C] shape-cyber-card text-xs font-bold text-[#013A40] cursor-pointer shadow-2xs focus:outline-hidden"
         >
           <option value="semua">📋 Semua Anggota Sesi</option>
           <option value="sudah">🟢 Sudah Bayar (Lunas/Sponsor)</option>
@@ -134,7 +142,7 @@ export const PaymentKasView: React.FC<PaymentKasViewProps> = ({
       </div>
 
       {/* MEMBER LIST */}
-      <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-xs divide-y divide-slate-100">
+      <div className="bg-white border-2 border-[#038C8C]/30 shape-cyber-card overflow-hidden shadow-xs divide-y divide-[#B2DCE5]/40">
         {filteredList.map(k => {
           const isLunas = (k.status_pembayaran === 'Lunas' || k.status_pembayaran === 'Tunai' || k.status_pembayaran === 'QRIS / Transfer');
           const isSponsor = (k.status_pembayaran === 'Sponsor / Free' || k.metode_pembayaran === 'Sponsor');
@@ -142,30 +150,30 @@ export const PaymentKasView: React.FC<PaymentKasViewProps> = ({
           const tagihan = Number(k.total_tagihan) || 0;
 
           const payIcon = isSponsor ? '🤝' : (k.metode_pembayaran === 'QRIS' ? '📱' : '💵');
-          const labelBtn = isSponsor ? '🤝 SPONSOR' : (isLunas ? '🟢 LUNAS' : '🔴 BELUM BAYAR');
+          const labelBtn = isSponsor ? '🤝 SPONSOR' : (isLunas ? '✓ LUNAS' : '⏳ BELUM BAYAR');
 
           return (
             <div
               key={k.nama_pemain}
               className={`p-3.5 flex items-center justify-between flex-wrap gap-3 transition ${
-                isLunas || isSponsor ? 'bg-emerald-50/30' : 'hover:bg-slate-50'
+                isLunas || isSponsor ? 'bg-[#B2DCE5]/10 hover:bg-[#B2DCE5]/20' : 'hover:bg-[#F2F2F2]'
               }`}
             >
               <div className="flex items-center gap-3">
                 <div
-                  className={`w-10 h-10 rounded-full flex items-center justify-center text-lg font-bold border transition ${
+                  className={`w-10 h-10 shape-cyber-card flex items-center justify-center text-lg font-bold border transition ${
                     isLunas || isSponsor
-                      ? 'bg-emerald-100 text-emerald-700 border-emerald-300'
-                      : 'bg-indigo-100 text-indigo-700 border-indigo-200'
+                      ? 'bg-[#038C8C] text-white border-[#B2DCE5]/50 shadow-xs'
+                      : 'bg-[#013A40] text-[#B2DCE5] border-[#038C8C]/40'
                   }`}
                 >
                   {payIcon}
                 </div>
 
                 <div>
-                  <div className="font-bold text-sm text-slate-800 flex items-center gap-1.5">
+                  <div className="font-black text-sm text-[#013A40] flex items-center gap-1.5 uppercase tracking-wide">
                     {(isLunas || isSponsor) && (
-                      <span className="w-4 h-4 rounded-full bg-emerald-500 text-white text-[10px] font-black flex items-center justify-center">
+                      <span className="w-4 h-4 shape-cyber-card bg-[#038C8C] text-white text-[10px] font-black flex items-center justify-center">
                         ✓
                       </span>
                     )}
@@ -173,15 +181,15 @@ export const PaymentKasView: React.FC<PaymentKasViewProps> = ({
                     {userRole === 'admin' && (
                       <button
                         onClick={() => onEditNominalPemain(k)}
-                        className="text-[10px] font-bold text-amber-700 bg-amber-100 hover:bg-amber-200 px-1.5 py-0.5 rounded-sm cursor-pointer ml-1"
+                        className="text-[10px] font-black text-[#013A40] bg-[#F8B700] hover:bg-[#e0a500] px-2 py-0.5 rounded-md cursor-pointer ml-1 shadow-2xs transition"
                       >
                         ✏️ Edit
                       </button>
                     )}
                   </div>
-                  <div className="text-xs text-slate-500 mt-0.5">
-                    Tagihan: <b className="text-slate-800">Rp {tagihan.toLocaleString('id-ID')}</b>
-                    <span className="text-[11px] text-slate-400 ml-1.5">
+                  <div className="text-xs text-[#013A40]/70 mt-0.5 font-medium">
+                    Tagihan: <b className="text-[#013A40] font-black">Rp {tagihan.toLocaleString('id-ID')}</b>
+                    <span className="text-[11px] text-[#038C8C] font-semibold ml-1.5">
                       (Lap: Rp {(Number(k.biaya_lapangan_per_pemain) || 10000).toLocaleString('id-ID')} + Cock: Rp {(Number(k.total_biaya_shuttlecock) || 3000).toLocaleString('id-ID')})
                     </span>
                   </div>
@@ -201,13 +209,13 @@ export const PaymentKasView: React.FC<PaymentKasViewProps> = ({
 
                     return (
                       <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
-                        <span className="text-[10px] font-black text-emerald-800 uppercase">
+                        <span className="text-[10px] font-black text-[#038C8C] uppercase font-tech">
                           🏸 Dari Match:
                         </span>
                         {matchCharges.map(mc => (
                           <span
                             key={mc.match_id}
-                            className="bg-emerald-100/90 text-emerald-800 text-[10px] px-2 py-0.5 rounded-md font-bold border border-emerald-300"
+                            className="bg-[#B2DCE5]/40 text-[#013A40] text-[10px] px-2 py-0.5 shape-cyber-pill font-bold border border-[#038C8C]/30"
                             title={`Match ${mc.match_id} (Lap ${mc.lapangan}, ${mc.durasi_menit})`}
                           >
                             Lap {mc.lapangan}: +{mc.jumlah_shuttlecock_tambahan} Cock
@@ -222,18 +230,18 @@ export const PaymentKasView: React.FC<PaymentKasViewProps> = ({
               <div className="flex items-center gap-2 flex-wrap">
                 {/* Shuttlecock Tambahan */}
                 {userRole === 'admin' && (
-                  <div className="flex items-center gap-1 bg-slate-100 border border-slate-300 rounded-md px-2 py-1" title="Shuttlecock Tambahan">
-                    <span className="text-[10px] font-bold text-slate-600">Cock +</span>
+                  <div className="flex items-center gap-1 bg-[#F2F2F2] border border-[#B2DCE5] shape-cyber-card px-2 py-1" title="Shuttlecock Tambahan">
+                    <span className="text-[10px] font-black text-[#013A40]">Cock +</span>
                     <button
                       onClick={() => onUbahShuttlecockTambahan(k.nama_pemain, -1)}
-                      className="w-5 h-5 bg-white hover:bg-slate-200 text-slate-800 border border-slate-300 rounded-xs font-bold text-xs flex items-center justify-center cursor-pointer"
+                      className="w-5 h-5 bg-white hover:bg-[#B2DCE5]/50 text-[#013A40] border border-[#B2DCE5] rounded-xs font-black text-xs flex items-center justify-center cursor-pointer transition"
                     >
                       -
                     </button>
-                    <b className="text-xs px-1 min-w-4 text-center">{extraCock}</b>
+                    <b className="text-xs px-1 min-w-4 text-center font-black text-[#013A40]">{extraCock}</b>
                     <button
                       onClick={() => onUbahShuttlecockTambahan(k.nama_pemain, 1)}
-                      className="w-5 h-5 bg-white hover:bg-slate-200 text-slate-800 border border-slate-300 rounded-xs font-bold text-xs flex items-center justify-center cursor-pointer"
+                      className="w-5 h-5 bg-white hover:bg-[#B2DCE5]/50 text-[#013A40] border border-[#B2DCE5] rounded-xs font-black text-xs flex items-center justify-center cursor-pointer transition"
                     >
                       +
                     </button>
@@ -245,14 +253,14 @@ export const PaymentKasView: React.FC<PaymentKasViewProps> = ({
                   <select
                     value={k.metode_pembayaran}
                     onChange={e => onGantiMetode(k.nama_pemain, e.target.value as any)}
-                    className="p-1.5 bg-white border border-slate-300 rounded-md text-xs font-bold text-slate-700 cursor-pointer"
+                    className="p-1.5 bg-white border border-[#B2DCE5] focus:border-[#038C8C] shape-cyber-card text-xs font-bold text-[#013A40] cursor-pointer focus:outline-hidden"
                   >
                     <option value="Tunai">💵 Tunai</option>
                     <option value="QRIS">📱 QRIS/TF</option>
                     <option value="Sponsor">🤝 Sponsor</option>
                   </select>
                 ) : (
-                  <span className="text-xs font-semibold text-slate-500 bg-slate-100 px-2 py-1 rounded-md">
+                  <span className="text-xs font-bold text-[#013A40] bg-[#B2DCE5]/30 border border-[#038C8C]/30 px-2 py-1 shape-cyber-card">
                     {k.metode_pembayaran}
                   </span>
                 )}
@@ -261,18 +269,18 @@ export const PaymentKasView: React.FC<PaymentKasViewProps> = ({
                 {userRole === 'admin' ? (
                   <button
                     onClick={() => onToggleStatusBayar(k.nama_pemain)}
-                    className={`py-1.5 px-3 rounded-md text-xs font-bold min-w-28 text-center cursor-pointer transition ${
+                    className={`py-1.5 px-3 shape-cyber-card text-xs font-black min-w-28 text-center cursor-pointer transition ${
                       isLunas || isSponsor
-                        ? 'bg-emerald-100 text-emerald-700 border border-emerald-300 shadow-2xs'
-                        : 'bg-slate-100 text-slate-600 border border-slate-300 hover:bg-slate-200'
+                        ? 'bg-[#038C8C] hover:bg-[#013A40] text-white border border-[#B2DCE5]/40 shadow-xs'
+                        : 'bg-[#F2F2F2] hover:bg-red-50 text-red-600 border border-red-200'
                     }`}
                   >
                     {labelBtn}
                   </button>
                 ) : (
                   <span
-                    className={`py-1 px-3 rounded-md text-xs font-bold ${
-                      isLunas || isSponsor ? 'text-emerald-700' : 'text-red-600'
+                    className={`py-1 px-3 shape-cyber-card text-xs font-black ${
+                      isLunas || isSponsor ? 'bg-[#038C8C]/20 text-[#038C8C] border border-[#038C8C]/30' : 'bg-red-50 text-red-600 border border-red-200'
                     }`}
                   >
                     {labelBtn}
@@ -288,13 +296,14 @@ export const PaymentKasView: React.FC<PaymentKasViewProps> = ({
       {/* TABEL RINCIAN SHUTTLECOCK TAMBAHAN PER MATCH_ID           */}
       {/* Terintegrasi langsung ke pembayaran tiap pemain           */}
       {/* ========================================================= */}
-      <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-xs space-y-4">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-slate-200 pb-3">
+      <div className="bg-white border-2 border-[#038C8C]/30 shape-cyber-card p-5 shadow-sm space-y-4">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-[#B2DCE5] pb-3">
           <div>
-            <h3 className="text-base font-bold text-slate-800 flex items-center gap-2">
-              <span>🏸</span> Tabel Rincian Shuttlecock Tambahan per Match ID
+            <h3 className="text-base font-black text-[#013A40] flex items-center gap-2 font-tech">
+              <span className="text-lg text-[#F8B700]">🏸</span>
+              <span>TABEL RINCIAN SHUTTLECOCK TAMBAHAN PER MATCH ID</span>
             </h3>
-            <p className="text-xs text-slate-500 mt-0.5">
+            <p className="text-xs text-[#013A40]/70 mt-0.5">
               Tabel data shuttlecock tambahan yang dicatat per partai pertandingan (match_id) dan otomatis membebankan tagihan ke pembayaran pemain.
             </p>
           </div>
@@ -305,9 +314,9 @@ export const PaymentKasView: React.FC<PaymentKasViewProps> = ({
               placeholder="🔍 Cari Match ID / Pemain..."
               value={searchCockMatch}
               onChange={e => setSearchCockMatch(e.target.value)}
-              className="px-3 py-1.5 text-xs border border-slate-300 rounded-lg focus:outline-emerald-500 bg-slate-50"
+              className="px-3 py-1.5 text-xs border border-[#B2DCE5] focus:border-[#038C8C] shape-cyber-card focus:outline-hidden bg-[#F2F2F2] text-[#013A40] font-bold"
             />
-            <span className="bg-emerald-100 text-emerald-800 font-extrabold text-xs px-2.5 py-1 rounded-full border border-emerald-300">
+            <span className="bg-[#F8B700] text-[#013A40] font-black text-xs px-3 py-1 shape-cyber-pill shadow-2xs">
               🏸 Total: {totalExtraCock} Cock
             </span>
           </div>
@@ -327,10 +336,10 @@ export const PaymentKasView: React.FC<PaymentKasViewProps> = ({
 
           if (matchesWithCock.length === 0) {
             return (
-              <div className="p-6 bg-slate-50 border border-dashed border-slate-300 rounded-lg text-center space-y-1">
-                <span className="text-2xl block">🏸</span>
-                <p className="text-xs font-bold text-slate-700">Belum Ada Shuttlecock Tambahan Pada Match Hari Ini</p>
-                <p className="text-[11px] text-slate-500">
+              <div className="p-6 bg-[#F2F2F2] border-2 border-dashed border-[#B2DCE5] shape-cyber-card text-center space-y-1">
+                <span className="text-2xl block text-[#F8B700]">🏸</span>
+                <p className="text-xs font-black text-[#013A40]">Belum Ada Shuttlecock Tambahan Pada Match Hari Ini</p>
+                <p className="text-[11px] text-[#013A40]/70">
                   Saat pertandingan berlangsung di menu <b>Klasemen & Match</b>, admin dapat menambahkan shuttlecock tambahan pada papan skor atau mengedit riwayat pertandingan. Biaya akan otomatis terintegrasi ke tagihan pemain di sini.
                 </p>
               </div>
@@ -339,7 +348,7 @@ export const PaymentKasView: React.FC<PaymentKasViewProps> = ({
 
           if (filteredMatches.length === 0) {
             return (
-              <div className="p-4 bg-slate-50 border border-slate-200 rounded-lg text-center text-xs text-slate-500">
+              <div className="p-4 bg-[#F2F2F2] border border-[#B2DCE5] shape-cyber-card text-center text-xs text-[#013A40]/70 font-bold">
                 Tidak ada match shuttlecock yang cocok dengan pencarian "{searchCockMatch}".
               </div>
             );
@@ -349,10 +358,10 @@ export const PaymentKasView: React.FC<PaymentKasViewProps> = ({
           let sumRupiah = 0;
 
           return (
-            <div className="overflow-x-auto border border-slate-200 rounded-lg">
+            <div className="overflow-x-auto border-2 border-[#038C8C]/30 shape-cyber-card">
               <table className="w-full text-xs text-left border-collapse">
                 <thead>
-                  <tr className="bg-slate-100/90 text-slate-600 font-extrabold uppercase text-[10px] border-b border-slate-200">
+                  <tr className="bg-[#013A40] text-[#F2F2F2] font-black uppercase text-[10px] border-b border-[#038C8C]/50 font-tech tracking-wider">
                     <th className="py-2.5 px-3 w-10 text-center">No</th>
                     <th className="py-2.5 px-3 w-28">Match ID</th>
                     <th className="py-2.5 px-3 w-20 text-center">Lap</th>
@@ -360,11 +369,11 @@ export const PaymentKasView: React.FC<PaymentKasViewProps> = ({
                     <th className="py-2.5 px-3 w-24 text-center">Cock Match</th>
                     <th className="py-2.5 px-3 min-w-52">Pemain yang Dibebankan</th>
                     <th className="py-2.5 px-3 w-28 text-right">Tarif / Cock</th>
-                    <th className="py-2.5 px-3 w-28 text-right">Subtotal</th>
+                    <th className="py-2.5 px-3 w-28 text-right text-[#F8B700]">Subtotal</th>
                     {userRole === 'admin' && onOpenEditMatch && <th className="py-2.5 px-3 w-16 text-center">Aksi</th>}
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100">
+                <tbody className="divide-y divide-[#B2DCE5]/40 font-medium">
                   {filteredMatches.map((m, idx) => {
                     const timA = [m.tim_a_pemain_1, m.tim_a_pemain_2].filter(Boolean).join(' / ');
                     const timB = [m.tim_b_pemain_1, m.tim_b_pemain_2].filter(Boolean).join(' / ');
@@ -386,32 +395,32 @@ export const PaymentKasView: React.FC<PaymentKasViewProps> = ({
                     sumRupiah += subtotalMatch;
 
                     return (
-                      <tr key={m.match_id} className="hover:bg-slate-50 transition">
-                        <td className="py-3 px-3 text-center font-bold text-slate-500">{idx + 1}</td>
+                      <tr key={m.match_id} className="hover:bg-[#B2DCE5]/15 transition">
+                        <td className="py-3 px-3 text-center font-bold text-[#013A40]/70">{idx + 1}</td>
                         <td className="py-3 px-3">
-                          <span className="font-mono font-bold text-sky-700 bg-sky-50 px-2 py-0.5 rounded border border-sky-200 text-[11px] block">
+                          <span className="font-mono font-black text-[#038C8C] bg-[#B2DCE5]/30 px-2 py-0.5 rounded border border-[#038C8C]/30 text-[11px] block">
                             {m.match_id}
                           </span>
-                          <span className="text-[10px] text-slate-400 mt-0.5 block">
+                          <span className="text-[10px] text-[#013A40]/50 mt-0.5 block">
                             ⏱️ {m.durasi_menit || '-'}
                           </span>
                         </td>
                         <td className="py-3 px-3 text-center">
-                          <span className="font-extrabold text-slate-700 bg-slate-100 px-2 py-0.5 rounded-full text-[11px]">
+                          <span className="font-black text-[#013A40] bg-[#F2F2F2] border border-[#B2DCE5] px-2 py-0.5 rounded-full text-[11px]">
                             Lap {m.lapangan}
                           </span>
                         </td>
-                        <td className="py-3 px-3 font-medium text-slate-800">
-                          <div className="font-bold flex items-center gap-1.5">
+                        <td className="py-3 px-3 font-medium text-[#013A40]">
+                          <div className="font-bold flex items-center gap-1.5 flex-wrap">
                             <span>{timA}</span>
-                            <span className="text-[10px] bg-slate-200 text-slate-800 px-1.5 py-0.2 rounded font-extrabold">
+                            <span className="text-[10px] bg-[#013A40] text-[#F8B700] px-1.5 py-0.5 rounded-sm font-black">
                               {m.skor_tim_a} : {m.skor_tim_b}
                             </span>
                             <span>{timB}</span>
                           </div>
                         </td>
                         <td className="py-3 px-3 text-center">
-                          <span className="bg-emerald-100 text-emerald-800 font-black px-2.5 py-1 rounded-full border border-emerald-300 text-xs inline-flex items-center gap-1">
+                          <span className="bg-[#038C8C] text-white font-black px-2.5 py-1 rounded-full border border-[#B2DCE5]/50 text-xs inline-flex items-center gap-1 shadow-2xs">
                             🏸 +{cockQty}
                           </span>
                         </td>
@@ -425,10 +434,10 @@ export const PaymentKasView: React.FC<PaymentKasViewProps> = ({
                               let badgeColor = 'bg-red-50 text-red-700 border-red-200';
                               let statusIcon = '⏳ Belum Bayar';
                               if (isSponsor) {
-                                badgeColor = 'bg-purple-50 text-purple-700 border-purple-200';
+                                badgeColor = 'bg-[#013A40] text-[#F8B700] border-[#038C8C]/40';
                                 statusIcon = '🤝 Sponsor';
                               } else if (isPaid) {
-                                badgeColor = 'bg-emerald-50 text-emerald-700 border-emerald-200';
+                                badgeColor = 'bg-[#038C8C]/20 text-[#038C8C] border-[#038C8C]/40';
                                 statusIcon = '✓ Lunas';
                               }
 
@@ -445,10 +454,10 @@ export const PaymentKasView: React.FC<PaymentKasViewProps> = ({
                             })}
                           </div>
                         </td>
-                        <td className="py-3 px-3 text-right text-slate-600 font-medium">
+                        <td className="py-3 px-3 text-right text-[#013A40]/80 font-bold">
                           Rp {tarifCock.toLocaleString('id-ID')}
                         </td>
-                        <td className="py-3 px-3 text-right font-extrabold text-emerald-700">
+                        <td className="py-3 px-3 text-right font-black text-[#038C8C]">
                           Rp {(cockQty * tarifCock).toLocaleString('id-ID')}
                         </td>
                         {userRole === 'admin' && onOpenEditMatch && (
@@ -456,7 +465,7 @@ export const PaymentKasView: React.FC<PaymentKasViewProps> = ({
                             <button
                               type="button"
                               onClick={() => onOpenEditMatch(m)}
-                              className="px-2 py-1 bg-amber-500 hover:bg-amber-600 text-white rounded text-[10px] font-bold cursor-pointer"
+                              className="px-2 py-1 bg-[#F8B700] hover:bg-[#e0a500] text-[#013A40] rounded-md text-[10px] font-black cursor-pointer shadow-2xs transition"
                               title="Edit Pertandingan & Cock Tambahan"
                             >
                               ✏️ Edit
@@ -468,17 +477,17 @@ export const PaymentKasView: React.FC<PaymentKasViewProps> = ({
                   })}
                 </tbody>
                 <tfoot>
-                  <tr className="bg-slate-50 font-black text-slate-800 border-t-2 border-slate-200">
-                    <td colSpan={4} className="py-2.5 px-3 text-right uppercase text-[10px]">
+                  <tr className="bg-[#F2F2F2] font-black text-[#013A40] border-t-2 border-[#B2DCE5]">
+                    <td colSpan={4} className="py-2.5 px-3 text-right uppercase text-[10px] font-tech">
                       Total Rangkuman Shuttlecock Match:
                     </td>
-                    <td className="py-2.5 px-3 text-center text-emerald-800 text-xs font-black">
+                    <td className="py-2.5 px-3 text-center text-[#038C8C] text-xs font-black">
                       +{sumCockPcs} Cock
                     </td>
-                    <td colSpan={2} className="py-2.5 px-3 text-right uppercase text-[10px] text-slate-500">
+                    <td colSpan={2} className="py-2.5 px-3 text-right uppercase text-[10px] text-[#013A40]/70 font-tech">
                       Total Nominal Cock Tambahan:
                     </td>
-                    <td className="py-2.5 px-3 text-right text-emerald-700 text-xs font-black">
+                    <td className="py-2.5 px-3 text-right text-[#038C8C] text-xs font-black">
                       Rp {sumRupiah.toLocaleString('id-ID')}
                     </td>
                     {userRole === 'admin' && onOpenEditMatch && <td></td>}

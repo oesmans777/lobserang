@@ -161,38 +161,38 @@ export const MatchView: React.FC<MatchViewProps> = ({
 
     if (userRole === 'member') {
       return (
-        <div key={courtNum} className="bg-white border-2 border-sky-500 rounded-xl shadow-md overflow-hidden flex flex-col">
-          <div className="py-2.5 px-4 text-center bg-sky-50 border-b border-sky-100">
-            <div className="font-extrabold text-sm text-sky-950 uppercase tracking-wider">LAPANGAN {courtNum}</div>
-            <div className="text-xs text-slate-500 font-semibold mt-0.5">
+        <div key={courtNum} className="bg-white border-2 border-[#038C8C]/50 shape-cyber-card shadow-lg overflow-hidden flex flex-col">
+          <div className="py-2.5 px-4 text-center bg-linear-to-r from-[#013A40] to-[#038C8C] text-[#F2F2F2]">
+            <div className="font-sporty font-black text-sm uppercase tracking-wider italic text-[#F8B700]">LAPANGAN {courtNum}</div>
+            <div className="text-xs text-[#B2DCE5] font-semibold mt-0.5">
               {s.berjalan ? `Status: Bertanding (${mStr}:${sStr})` : 'Status: Belum Mulai'}
             </div>
           </div>
 
-          <div className="relative bg-[#1e5631] border-4 border-white rounded-lg m-3 h-36 flex overflow-hidden shadow-inner">
-            <div className="absolute top-0 bottom-0 left-1/2 w-1 bg-white -translate-x-1/2 z-10"></div>
-            <div className="absolute top-1/2 left-0 right-0 h-0.5 bg-white/40 -translate-y-1/2 z-10"></div>
+          <div className="relative bg-[#013A40] border-4 border-[#038C8C] shape-cyber-card m-3 h-36 flex overflow-hidden shadow-inner">
+            <div className="absolute top-0 bottom-0 left-1/2 w-1 bg-[#B2DCE5]/40 -translate-x-1/2 z-10"></div>
+            <div className="absolute top-1/2 left-0 right-0 h-0.5 bg-[#B2DCE5]/20 -translate-y-1/2 z-10"></div>
 
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-black border-2 border-cyan-400 shadow-[0_0_10px_rgba(0,243,255,0.6)] rounded-md px-2 py-0.5 font-['Orbitron',sans-serif] text-[11px] font-bold text-cyan-400 z-20">
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-[#00272B] border-2 border-[#F8B700] shadow-[0_0_10px_rgba(248,183,0,0.5)] shape-cyber-pill px-2.5 py-0.5 font-['Orbitron',sans-serif] text-[11px] font-black text-[#F8B700] z-20">
               {mStr}:{sStr}
             </div>
 
-            <div className="flex-1 flex flex-col items-center justify-center z-10 border-r border-dashed border-white/30 p-2">
-              <div className="font-['Orbitron',sans-serif] text-2xl font-black text-amber-400 drop-shadow-md mb-1">
+            <div className="flex-1 flex flex-col items-center justify-center z-10 border-r border-dashed border-[#B2DCE5]/30 p-2">
+              <div className="font-['Orbitron',sans-serif] text-3xl font-black text-[#F8B700] drop-shadow-[0_0_10px_rgba(248,183,0,0.5)] mb-1">
                 {s.skorA}
               </div>
-              {s.ta1 && <div className="bg-black/70 text-white text-[10px] font-bold px-2 py-0.5 rounded-full border border-white/20 truncate max-w-full">{s.ta1}</div>}
-              {s.ta2 && <div className="bg-black/70 text-white text-[10px] font-bold px-2 py-0.5 rounded-full border border-white/20 truncate max-w-full mt-1">{s.ta2}</div>}
-              {!s.ta1 && !s.ta2 && <div className="text-white/50 text-[10px] italic">Kosong</div>}
+              {s.ta1 && <div className="bg-[#038C8C]/60 text-white text-[10px] font-bold px-2 py-0.5 rounded-md border border-[#B2DCE5]/40 truncate max-w-full">{s.ta1}</div>}
+              {s.ta2 && <div className="bg-[#038C8C]/60 text-white text-[10px] font-bold px-2 py-0.5 rounded-md border border-[#B2DCE5]/40 truncate max-w-full mt-1">{s.ta2}</div>}
+              {!s.ta1 && !s.ta2 && <div className="text-[#B2DCE5]/50 text-[10px] italic">Kosong</div>}
             </div>
 
             <div className="flex-1 flex flex-col items-center justify-center z-10 p-2">
-              <div className="font-['Orbitron',sans-serif] text-2xl font-black text-amber-400 drop-shadow-md mb-1">
+              <div className="font-['Orbitron',sans-serif] text-3xl font-black text-[#F8B700] drop-shadow-[0_0_10px_rgba(248,183,0,0.5)] mb-1">
                 {s.skorB}
               </div>
-              {s.tb1 && <div className="bg-black/70 text-white text-[10px] font-bold px-2 py-0.5 rounded-full border border-white/20 truncate max-w-full">{s.tb1}</div>}
-              {s.tb2 && <div className="bg-black/70 text-white text-[10px] font-bold px-2 py-0.5 rounded-full border border-white/20 truncate max-w-full mt-1">{s.tb2}</div>}
-              {!s.tb1 && !s.tb2 && <div className="text-white/50 text-[10px] italic">Kosong</div>}
+              {s.tb1 && <div className="bg-[#038C8C]/60 text-white text-[10px] font-bold px-2 py-0.5 rounded-md border border-[#B2DCE5]/40 truncate max-w-full">{s.tb1}</div>}
+              {s.tb2 && <div className="bg-[#038C8C]/60 text-white text-[10px] font-bold px-2 py-0.5 rounded-md border border-[#B2DCE5]/40 truncate max-w-full mt-1">{s.tb2}</div>}
+              {!s.tb1 && !s.tb2 && <div className="text-[#B2DCE5]/50 text-[10px] italic">Kosong</div>}
             </div>
           </div>
         </div>
@@ -200,18 +200,18 @@ export const MatchView: React.FC<MatchViewProps> = ({
     }
 
     return (
-      <div key={courtNum} className="bg-white border-2 border-sky-500 rounded-xl shadow-md overflow-hidden flex flex-col relative">
+      <div key={courtNum} className="bg-white border-2 border-[#038C8C]/40 shape-cyber-card shadow-md overflow-hidden flex flex-col relative">
         {s.berjalan && (
-          <div className="absolute top-2.5 right-3 bg-red-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full animate-pulse z-20">
-            🔴 LIVE
+          <div className="absolute top-2.5 right-3 bg-[#F8B700] text-[#013A40] text-[10px] font-black px-2.5 py-0.5 shape-cyber-pill animate-pulse z-20 shadow-[0_0_8px_#F8B700]">
+            ⚡ LIVE
           </div>
         )}
 
-        <div className="py-2.5 px-4 text-center bg-slate-50 border-b border-slate-200/90">
-          <div className="font-sporty font-black text-sm text-slate-900 uppercase tracking-wider italic">
+        <div className="py-2.5 px-4 text-center bg-linear-to-r from-[#013A40] to-[#038C8C] text-[#F2F2F2] border-b border-[#038C8C]/50">
+          <div className="font-sporty font-black text-sm tracking-wider uppercase italic text-[#F8B700]">
             LAPANGAN {courtNum}
           </div>
-          <div className="text-xs text-slate-500 font-semibold mt-0.5 font-mono">
+          <div className="text-xs text-[#B2DCE5] font-bold mt-0.5 font-mono">
             {s.berjalan ? `Status: Bertanding (${mStr}:${sStr})` : 'Status: Belum Mulai'}
           </div>
         </div>
@@ -223,7 +223,7 @@ export const MatchView: React.FC<MatchViewProps> = ({
               <select
                 value={s.ta1}
                 onChange={e => onUpdateCourtSlot(courtNum, 'ta1', e.target.value)}
-                className="w-full p-1.5 border border-slate-300 rounded-md text-xs font-bold bg-white"
+                className="w-full p-1.5 border border-[#B2DCE5] focus:border-[#038C8C] rounded-lg text-xs font-bold text-[#013A40] bg-white focus:outline-hidden"
               >
                 <option value="">-- Pilih Pemain A1 --</option>
                 {pemainHadir.map(p => {
@@ -234,7 +234,7 @@ export const MatchView: React.FC<MatchViewProps> = ({
               <select
                 value={s.ta2}
                 onChange={e => onUpdateCourtSlot(courtNum, 'ta2', e.target.value)}
-                className="w-full p-1.5 border border-slate-300 rounded-md text-xs font-bold bg-white"
+                className="w-full p-1.5 border border-[#B2DCE5] focus:border-[#038C8C] rounded-lg text-xs font-bold text-[#013A40] bg-white focus:outline-hidden"
               >
                 <option value="">-- Pilih Pemain A2 --</option>
                 {pemainHadir.map(p => {
@@ -244,11 +244,11 @@ export const MatchView: React.FC<MatchViewProps> = ({
               </select>
             </div>
 
-            <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl border border-slate-200">
+            <div className="flex items-center gap-1 bg-[#F2F2F2] p-1 shape-cyber-card border border-[#B2DCE5]">
               <button
                 type="button"
                 onClick={() => onUpdateCourtScore(courtNum, 'skorA', Math.max(0, (s.skorA || 0) - 1))}
-                className="w-7 h-8 bg-white hover:bg-slate-200 text-slate-800 rounded-lg font-bold text-sm flex items-center justify-center cursor-pointer shadow-2xs transition"
+                className="w-7 h-8 bg-white hover:bg-[#B2DCE5]/50 text-[#013A40] rounded-lg font-black text-sm flex items-center justify-center cursor-pointer shadow-2xs transition"
               >
                 -
               </button>
@@ -257,19 +257,19 @@ export const MatchView: React.FC<MatchViewProps> = ({
                 min="0"
                 value={s.skorA}
                 onChange={e => onUpdateCourtScore(courtNum, 'skorA', Number(e.target.value) || 0)}
-                className="w-9 text-center text-xl font-mono font-black p-0.5 bg-transparent border-0 focus:outline-hidden"
+                className="w-9 text-center text-xl font-mono font-black p-0.5 bg-transparent border-0 focus:outline-hidden text-[#013A40]"
               />
               <button
                 type="button"
                 onClick={() => onUpdateCourtScore(courtNum, 'skorA', (s.skorA || 0) + 1)}
-                className="w-7 h-8 bg-white hover:bg-slate-200 text-slate-800 rounded-lg font-bold text-sm flex items-center justify-center cursor-pointer shadow-2xs transition"
+                className="w-7 h-8 bg-[#038C8C] hover:bg-[#013A40] text-white rounded-lg font-black text-sm flex items-center justify-center cursor-pointer shadow-2xs transition"
               >
                 +
               </button>
             </div>
           </div>
 
-          <div className="text-center font-extrabold text-xs text-slate-400 italic">VS</div>
+          <div className="text-center font-extrabold text-xs text-[#038C8C] italic">VS</div>
 
           {/* TIM B */}
           <div className="flex items-center gap-2">
@@ -277,7 +277,7 @@ export const MatchView: React.FC<MatchViewProps> = ({
               <select
                 value={s.tb1}
                 onChange={e => onUpdateCourtSlot(courtNum, 'tb1', e.target.value)}
-                className="w-full p-1.5 border border-slate-300 rounded-md text-xs font-bold bg-white"
+                className="w-full p-1.5 border border-[#B2DCE5] focus:border-[#038C8C] rounded-lg text-xs font-bold text-[#013A40] bg-white focus:outline-hidden"
               >
                 <option value="">-- Pilih Pemain B1 --</option>
                 {pemainHadir.map(p => {
@@ -288,7 +288,7 @@ export const MatchView: React.FC<MatchViewProps> = ({
               <select
                 value={s.tb2}
                 onChange={e => onUpdateCourtSlot(courtNum, 'tb2', e.target.value)}
-                className="w-full p-1.5 border border-slate-300 rounded-md text-xs font-bold bg-white"
+                className="w-full p-1.5 border border-[#B2DCE5] focus:border-[#038C8C] rounded-lg text-xs font-bold text-[#013A40] bg-white focus:outline-hidden"
               >
                 <option value="">-- Pilih Pemain B2 --</option>
                 {pemainHadir.map(p => {
@@ -298,11 +298,11 @@ export const MatchView: React.FC<MatchViewProps> = ({
               </select>
             </div>
 
-            <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl border border-slate-200">
+            <div className="flex items-center gap-1 bg-[#F2F2F2] p-1 shape-cyber-card border border-[#B2DCE5]">
               <button
                 type="button"
                 onClick={() => onUpdateCourtScore(courtNum, 'skorB', Math.max(0, (s.skorB || 0) - 1))}
-                className="w-7 h-8 bg-white hover:bg-slate-200 text-slate-800 rounded-lg font-bold text-sm flex items-center justify-center cursor-pointer shadow-2xs transition"
+                className="w-7 h-8 bg-white hover:bg-[#B2DCE5]/50 text-[#013A40] rounded-lg font-black text-sm flex items-center justify-center cursor-pointer shadow-2xs transition"
               >
                 -
               </button>
@@ -311,12 +311,12 @@ export const MatchView: React.FC<MatchViewProps> = ({
                 min="0"
                 value={s.skorB}
                 onChange={e => onUpdateCourtScore(courtNum, 'skorB', Number(e.target.value) || 0)}
-                className="w-9 text-center text-xl font-mono font-black p-0.5 bg-transparent border-0 focus:outline-hidden"
+                className="w-9 text-center text-xl font-mono font-black p-0.5 bg-transparent border-0 focus:outline-hidden text-[#013A40]"
               />
               <button
                 type="button"
                 onClick={() => onUpdateCourtScore(courtNum, 'skorB', (s.skorB || 0) + 1)}
-                className="w-7 h-8 bg-white hover:bg-slate-200 text-slate-800 rounded-lg font-bold text-sm flex items-center justify-center cursor-pointer shadow-2xs transition"
+                className="w-7 h-8 bg-[#038C8C] hover:bg-[#013A40] text-white rounded-lg font-black text-sm flex items-center justify-center cursor-pointer shadow-2xs transition"
               >
                 +
               </button>
@@ -325,9 +325,9 @@ export const MatchView: React.FC<MatchViewProps> = ({
 
           {/* KESEIMBANGAN MATCH */}
           {(s.ta1 || s.tb1) && (
-            <div className="text-[11px] font-bold text-slate-600 border-t border-dashed border-slate-200 pt-2 flex justify-between items-center">
+            <div className="text-[11px] font-bold text-[#013A40] border-t border-dashed border-[#B2DCE5] pt-2 flex justify-between items-center">
               <span>Team A: <b>{totalA.toFixed(1)}</b></span>
-              <span className={selisih > 1.5 ? 'text-red-500 font-extrabold' : 'text-emerald-600 font-extrabold'}>
+              <span className={selisih > 1.5 ? 'text-red-500 font-black' : 'text-[#038C8C] font-black'}>
                 Selisih: {selisih.toFixed(1)}
               </span>
               <span>Team B: <b>{totalB.toFixed(1)}</b></span>
@@ -335,32 +335,33 @@ export const MatchView: React.FC<MatchViewProps> = ({
           )}
 
           {selisih > 1.5 && s.ta1 && s.ta2 && s.tb1 && s.tb2 && (
-            <div className="p-2 bg-amber-50 border border-amber-200 rounded-md text-[11px] text-amber-800">
+            <div className="p-2 bg-[#F8B700]/15 border border-[#F8B700] rounded-md text-[11px] text-[#013A40] font-bold">
               ⚠️ <b>Laga Kurang Seimbang!</b> Selisih grade {selisih.toFixed(1)}.
             </div>
           )}
 
           {/* INTEGRASI SHUTTLECOCK TAMBAHAN DALAM MATCH_ID */}
-          <div className="bg-emerald-50/80 border border-emerald-200 rounded-lg p-2.5 flex flex-col gap-2">
+          <div className="bg-[#B2DCE5]/25 border border-[#038C8C]/30 shape-cyber-card p-2.5 flex flex-col gap-2">
             <div className="flex items-center justify-between">
-              <span className="text-[11px] font-black text-emerald-900 uppercase flex items-center gap-1">
-                🏸 Shuttlecock Tambahan Match:
+              <span className="text-[11px] font-black text-[#013A40] uppercase flex items-center gap-1.5 font-tech">
+                <span className="text-sm text-[#038C8C]">🏸</span>
+                <span>SHUTTLECOCK TAMBAHAN:</span>
               </span>
-              <div className="flex items-center gap-1.5 bg-white border border-emerald-300 rounded-md px-2 py-0.5 shadow-2xs">
+              <div className="flex items-center gap-1.5 bg-white border border-[#B2DCE5] rounded-md px-2 py-0.5 shadow-2xs">
                 <button
                   type="button"
                   onClick={() => onUpdateCourtCock(courtNum, Math.max(0, (s.cockTambahan || 0) - 1))}
-                  className="w-5 h-5 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded font-bold text-xs flex items-center justify-center cursor-pointer"
+                  className="w-5 h-5 bg-[#F2F2F2] hover:bg-[#B2DCE5] text-[#013A40] rounded font-black text-xs flex items-center justify-center cursor-pointer"
                 >
                   -
                 </button>
-                <span className="font-extrabold text-xs text-emerald-950 min-w-5 text-center">
+                <span className="font-black text-xs text-[#013A40] min-w-5 text-center">
                   {s.cockTambahan || 0} Pcs
                 </span>
                 <button
                   type="button"
                   onClick={() => onUpdateCourtCock(courtNum, (s.cockTambahan || 0) + 1)}
-                  className="w-5 h-5 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded font-bold text-xs flex items-center justify-center cursor-pointer"
+                  className="w-5 h-5 bg-[#038C8C] hover:bg-[#013A40] text-white rounded font-black text-xs flex items-center justify-center cursor-pointer"
                 >
                   +
                 </button>
@@ -369,12 +370,12 @@ export const MatchView: React.FC<MatchViewProps> = ({
 
             {(s.cockTambahan || 0) > 0 && (
               <div className="space-y-1">
-                <div className="text-[10px] font-bold text-slate-600 flex items-center justify-between">
+                <div className="text-[10px] font-bold text-[#013A40] flex items-center justify-between">
                   <span>Bebankan Biaya Ke:</span>
                   <button
                     type="button"
                     onClick={() => onToggleAllBebanCock(courtNum, [s.ta1, s.ta2, s.tb1, s.tb2].filter(Boolean))}
-                    className="text-[9px] text-blue-600 font-bold underline cursor-pointer hover:text-blue-800"
+                    className="text-[9px] text-[#038C8C] font-black underline cursor-pointer hover:text-[#013A40]"
                   >
                     Pilih Semua (4 Pemain)
                   </button>
@@ -389,8 +390,8 @@ export const MatchView: React.FC<MatchViewProps> = ({
                         onClick={() => onToggleBebanCock(courtNum, playerName)}
                         className={`text-[10px] font-bold px-2 py-0.5 rounded-full border cursor-pointer transition ${
                           isSelected
-                            ? 'bg-emerald-600 text-white border-emerald-700 shadow-2xs'
-                            : 'bg-white text-slate-600 border-slate-300 hover:bg-slate-100'
+                            ? 'bg-[#038C8C] text-white border-[#038C8C] shadow-2xs'
+                            : 'bg-white text-[#013A40] border-[#B2DCE5] hover:bg-[#B2DCE5]/40'
                         }`}
                       >
                         {isSelected ? '✓ ' : '+ '} {playerName}
@@ -403,28 +404,28 @@ export const MatchView: React.FC<MatchViewProps> = ({
           </div>
         </div>
 
-        <div className="grid grid-cols-3 gap-2 p-3 bg-slate-50 border-t border-slate-200">
+        <div className="grid grid-cols-3 gap-2 p-3 bg-[#F2F2F2] border-t border-[#B2DCE5]">
           <button
             onClick={() => onMulaiMatchTimer(courtNum)}
-            className={`min-h-[44px] rounded-xl font-bold text-xs text-white cursor-pointer transition flex items-center justify-center gap-1 shadow-2xs ${
-              s.berjalan ? 'bg-red-500 hover:bg-red-600' : 'bg-emerald-600 hover:bg-emerald-700'
+            className={`min-h-[44px] shape-cyber-card font-extrabold text-xs text-white cursor-pointer transition flex items-center justify-center gap-1 shadow-2xs ${
+              s.berjalan ? 'bg-red-500 hover:bg-red-600' : 'bg-[#038C8C] hover:bg-[#013A40]'
             }`}
           >
             {s.berjalan ? '⏹️ Batal' : '⏱️ Mulai'}
           </button>
           <button
             onClick={() => onAutoDraft(courtNum)}
-            className="min-h-[44px] bg-slate-800 hover:bg-slate-900 text-white rounded-xl font-bold text-xs cursor-pointer transition flex items-center justify-center gap-1 shadow-2xs"
+            className="min-h-[44px] bg-[#013A40] hover:bg-[#038C8C] text-white shape-cyber-card font-extrabold text-xs cursor-pointer transition flex items-center justify-center gap-1 shadow-2xs"
           >
             🎲 Auto Draft
           </button>
           <button
             onClick={() => onSelesaiMatch(courtNum)}
             disabled={!s.berjalan}
-            className={`min-h-[44px] rounded-xl font-bold text-xs text-white transition flex items-center justify-center gap-1 shadow-2xs ${
+            className={`min-h-[44px] shape-cyber-card font-black text-xs transition flex items-center justify-center gap-1 shadow-2xs ${
               s.berjalan
-                ? 'bg-sky-600 hover:bg-sky-700 cursor-pointer'
-                : 'bg-slate-200 text-slate-400 cursor-not-allowed'
+                ? 'bg-[#F8B700] hover:bg-[#e0a500] text-[#013A40] cursor-pointer shadow-[0_0_8px_rgba(248,183,0,0.5)]'
+                : 'bg-[#B2DCE5]/40 text-[#013A40]/40 cursor-not-allowed'
             }`}
           >
             💾 Selesai
@@ -436,93 +437,94 @@ export const MatchView: React.FC<MatchViewProps> = ({
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between border-b border-slate-200 pb-3">
-        <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2">
-          🏆 Klasemen Liga & Pertandingan Hari Ini
+      <div className="flex items-center justify-between border-b border-[#B2DCE5] pb-3">
+        <h2 className="text-xl font-black text-[#013A40] flex items-center gap-2 font-sporty uppercase italic">
+          <span className="text-2xl text-[#F8B700]">🏆</span>
+          <span>Klasemen Liga & Pertandingan Hari Ini</span>
         </h2>
       </div>
 
       {/* TABEL KLASEMEN HARIAN */}
-      <div className="overflow-x-auto border border-slate-200 rounded-xl shadow-xs bg-white">
+      <div className="overflow-x-auto border-2 border-[#038C8C]/30 shape-cyber-card shadow-sm bg-white">
         <table className="w-full text-center text-xs border-collapse">
           <thead>
-            <tr className="bg-slate-50 text-slate-500 uppercase font-bold text-[11px] border-b-2 border-slate-200">
-              <th className="py-2.5 px-2 w-10">Pos</th>
-              <th className="py-2.5 px-3 text-left w-36">Pemain</th>
-              <th className="py-2.5 px-3 text-left w-36">Status Hadir</th>
-              <th className="py-2.5 px-2 w-12">Mp</th>
-              <th className="py-2.5 px-2 w-12 text-emerald-600">M</th>
-              <th className="py-2.5 px-2 w-12 text-red-600">K</th>
-              <th className="py-2.5 px-2 w-12 text-emerald-600">PM</th>
-              <th className="py-2.5 px-2 w-12 text-red-600">PK</th>
-              <th className="py-2.5 px-2 w-14 text-purple-600">SP</th>
-              <th className="py-2.5 px-2 w-16 text-blue-600">Poin</th>
-              <th className="py-2.5 px-2 w-20">Rata Waktu</th>
-              <th className="py-2.5 px-2">5 Laga (Form)</th>
-              {userRole === 'admin' && <th className="py-2.5 px-2 w-10">Del</th>}
+            <tr className="bg-[#013A40] text-[#F2F2F2] uppercase font-black text-[11px] border-b-2 border-[#038C8C]/50 font-tech tracking-wider">
+              <th className="py-3 px-2 w-10">Pos</th>
+              <th className="py-3 px-3 text-left w-36">Pemain</th>
+              <th className="py-3 px-3 text-left w-36">Status Hadir</th>
+              <th className="py-3 px-2 w-12">Mp</th>
+              <th className="py-3 px-2 w-12 text-[#F8B700]">M</th>
+              <th className="py-3 px-2 w-12 text-red-300">K</th>
+              <th className="py-3 px-2 w-12 text-[#B2DCE5]">PM</th>
+              <th className="py-3 px-2 w-12 text-slate-300">PK</th>
+              <th className="py-3 px-2 w-14 text-[#B2DCE5]">SP</th>
+              <th className="py-3 px-2 w-16 text-[#F8B700]">Poin</th>
+              <th className="py-3 px-2 w-20">Rata Waktu</th>
+              <th className="py-3 px-2">5 Laga (Form)</th>
+              {userRole === 'admin' && <th className="py-3 px-2 w-10">Del</th>}
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-100">
+          <tbody className="divide-y divide-[#B2DCE5]/40 font-medium">
             {sortedStandings.map((p, idx) => {
               const spStr = (p.selisihSkor > 0 ? '+' : '') + p.selisihSkor;
               const avgSec = p.main > 0 ? Math.floor(p.totalDurasiDetik / p.main) : 0;
               const avgStr = String(Math.floor(avgSec / 60)).padStart(2, '0') + ':' + String(avgSec % 60).padStart(2, '0');
 
               return (
-                <tr key={p.nama} className="hover:bg-slate-50/80 transition">
-                  <td className="py-2 px-1">
+                <tr key={p.nama} className="hover:bg-[#B2DCE5]/15 transition">
+                  <td className="py-2.5 px-1">
                     <span
-                      className={`inline-flex items-center justify-center w-6 h-6 rounded-md font-black text-xs ${
+                      className={`inline-flex items-center justify-center w-6 h-6 shape-cyber-card font-black text-xs ${
                         idx === 0
-                          ? 'bg-amber-100 text-amber-800'
+                          ? 'bg-[#F8B700] text-[#013A40] shadow-[0_0_8px_rgba(248,183,0,0.6)]'
                           : idx === 1
-                          ? 'bg-slate-200 text-slate-700'
+                          ? 'bg-[#B2DCE5] text-[#013A40]'
                           : idx === 2
-                          ? 'bg-orange-100 text-orange-800'
-                          : 'bg-slate-100 text-slate-500'
+                          ? 'bg-[#038C8C] text-white'
+                          : 'bg-[#F2F2F2] text-[#013A40]/70'
                       }`}
                     >
                       {idx + 1}
                     </span>
                   </td>
-                  <td className="py-2 px-3 text-left font-bold text-slate-800">{p.nama}</td>
-                  <td className="py-2 px-3 text-left">
+                  <td className="py-2.5 px-3 text-left font-black text-[#013A40] uppercase tracking-wide">{p.nama}</td>
+                  <td className="py-2.5 px-3 text-left">
                     <div className="flex items-center gap-1.5">
                       <button
                         onClick={() => userRole === 'admin' && onToggleAbsensi(p.nama)}
                         disabled={userRole !== 'admin'}
-                        className={`text-[11px] font-bold px-2.5 py-1 rounded-full cursor-pointer flex items-center gap-1 transition ${
+                        className={`text-[11px] font-black px-2.5 py-1 shape-cyber-pill cursor-pointer flex items-center gap-1.5 transition ${
                           p.hadir
-                            ? 'bg-emerald-500 text-white'
-                            : 'bg-red-100 text-red-600 hover:bg-red-200'
+                            ? 'bg-[#038C8C] text-white shadow-2xs'
+                            : 'bg-red-50 text-red-600 border border-red-200 hover:bg-red-100'
                         }`}
                       >
-                        <span className={`w-1.5 h-1.5 rounded-full ${p.hadir ? 'bg-white' : 'bg-red-500'}`}></span>
+                        <span className={`w-1.5 h-1.5 rounded-full ${p.hadir ? 'bg-[#F8B700]' : 'bg-red-500'}`}></span>
                         {p.hadir ? 'HADIR' : 'ABSEN'}
                       </button>
                       {p.jamDatang && (
-                        <span className="text-[10px] font-mono font-bold bg-slate-200 text-slate-700 px-1.5 py-0.5 rounded-sm">
+                        <span className="text-[10px] font-mono font-bold bg-[#B2DCE5]/40 text-[#013A40] px-1.5 py-0.5 rounded-md">
                           ⏱️ {p.jamDatang}
                         </span>
                       )}
                     </div>
                   </td>
-                  <td className="py-2 px-2 font-bold">{p.main}</td>
-                  <td className="py-2 px-2 font-bold text-emerald-600">{p.menang}</td>
-                  <td className="py-2 px-2 font-bold text-red-600">{p.kalah}</td>
-                  <td className="py-2 px-2 font-semibold text-emerald-600">{p.skorMenang}</td>
-                  <td className="py-2 px-2 font-semibold text-red-600">{p.skorKalah}</td>
-                  <td className="py-2 px-2 font-bold text-purple-600">{spStr}</td>
-                  <td className="py-2 px-2 font-black text-blue-600 text-sm">{p.poin}</td>
-                  <td className="py-2 px-2 font-mono font-bold text-slate-600">{avgStr}</td>
-                  <td className="py-2 px-2">
+                  <td className="py-2.5 px-2 font-black text-[#013A40]">{p.main}</td>
+                  <td className="py-2.5 px-2 font-black text-[#038C8C]">{p.menang}</td>
+                  <td className="py-2.5 px-2 font-black text-red-500">{p.kalah}</td>
+                  <td className="py-2.5 px-2 font-bold text-[#038C8C]">{p.skorMenang}</td>
+                  <td className="py-2.5 px-2 font-bold text-red-500">{p.skorKalah}</td>
+                  <td className="py-2.5 px-2 font-black text-[#013A40]">{spStr}</td>
+                  <td className="py-2.5 px-2 font-black text-[#038C8C] text-sm tabular-nums">{p.poin}</td>
+                  <td className="py-2.5 px-2 font-mono font-bold text-[#013A40]/70">{avgStr}</td>
+                  <td className="py-2.5 px-2">
                     {p.form.length > 0 ? (
                       <div className="flex gap-1 justify-center">
                         {p.form.slice(-5).map((f, fIdx) => (
                           <span
                             key={fIdx}
-                            className={`w-4 h-4 rounded-xs text-[10px] font-bold text-white flex items-center justify-center ${
-                              f === 'M' ? 'bg-emerald-500' : 'bg-red-500'
+                            className={`w-4 h-4 rounded-xs text-[10px] font-black text-white flex items-center justify-center ${
+                              f === 'M' ? 'bg-[#038C8C]' : 'bg-red-500'
                             }`}
                           >
                             {f}
@@ -534,10 +536,11 @@ export const MatchView: React.FC<MatchViewProps> = ({
                     )}
                   </td>
                   {userRole === 'admin' && (
-                    <td className="py-2 px-2">
+                    <td className="py-2.5 px-2">
                       <button
                         onClick={() => onHapusPemain(p.nama)}
                         className="text-red-500 hover:text-red-700 cursor-pointer"
+                        title="Hapus Pemain"
                       >
                         ❌
                       </button>
@@ -551,25 +554,26 @@ export const MatchView: React.FC<MatchViewProps> = ({
       </div>
 
       {/* PAPAN SKOR LAPANGAN */}
-      <div className="flex items-center justify-between border-b border-slate-200 pb-2 pt-4">
-        <h3 className="text-base font-bold text-slate-800 flex items-center gap-2">
-          🎚️ Papan Skor Pertandingan
+      <div className="flex items-center justify-between border-b border-[#B2DCE5] pb-2.5 pt-4">
+        <h3 className="text-base font-black text-[#013A40] flex items-center gap-2 font-tech">
+          <span className="text-lg text-[#038C8C]">🎚️</span>
+          <span>PAPAN SKOR PERTANDINGAN LIVE</span>
         </h3>
         {userRole === 'admin' && (
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-2">
             <button
               onClick={onTambahLapangan}
-              className="w-7 h-7 bg-emerald-500 hover:bg-emerald-600 text-white rounded-md font-bold text-sm flex items-center justify-center cursor-pointer"
+              className="h-8 px-3 bg-[#038C8C] hover:bg-[#013A40] text-white shape-cyber-card font-black text-xs flex items-center justify-center gap-1 cursor-pointer transition shadow-xs"
               title="Tambah Lapangan"
             >
-              +
+              <span>+ Lapangan</span>
             </button>
             <button
               onClick={onKurangiLapangan}
-              className="w-7 h-7 bg-red-500 hover:bg-red-600 text-white rounded-md font-bold text-sm flex items-center justify-center cursor-pointer"
+              className="h-8 px-3 bg-[#F2F2F2] hover:bg-red-100 text-red-600 border border-red-300 shape-cyber-card font-black text-xs flex items-center justify-center gap-1 cursor-pointer transition shadow-xs"
               title="Kurangi Lapangan"
             >
-              -
+              <span>- Lapangan</span>
             </button>
           </div>
         )}
@@ -580,42 +584,43 @@ export const MatchView: React.FC<MatchViewProps> = ({
       </div>
 
       {/* RIWAYAT MATCH HARIAN */}
-      <div className="border-t border-slate-200 pt-4">
-        <h3 className="text-base font-bold text-slate-800 mb-3 flex items-center gap-2">
-          📜 Riwayat Hasil Pertandingan Hari Ini
+      <div className="border-t border-[#B2DCE5] pt-5">
+        <h3 className="text-base font-black text-[#013A40] mb-3 flex items-center gap-2 font-tech">
+          <span className="text-lg text-[#F8B700]">📜</span>
+          <span>RIWAYAT HASIL PERTANDINGAN HARI INI</span>
         </h3>
 
         {pertandinganList.length === 0 ? (
-          <div className="p-4 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-500 text-center">
+          <div className="p-6 bg-white border-2 border-dashed border-[#B2DCE5] shape-cyber-card text-xs text-[#013A40]/60 text-center font-bold">
             Belum ada pertandingan selesai hari ini.
           </div>
         ) : (
-          <div className="space-y-2">
+          <div className="space-y-2.5">
             {pertandinganList.map(m => {
               const timA = [m.tim_a_pemain_1, m.tim_a_pemain_2].filter(Boolean).join(' / ');
               const timB = [m.tim_b_pemain_1, m.tim_b_pemain_2].filter(Boolean).join(' / ');
               return (
                 <div
                   key={m.match_id}
-                  className="p-3 bg-white border border-slate-200 border-l-4 border-l-sky-500 rounded-lg shadow-2xs flex items-center justify-between text-xs"
+                  className="p-3.5 bg-white border border-[#B2DCE5] border-l-4 border-l-[#038C8C] shape-cyber-card shadow-xs flex items-center justify-between text-xs transition hover:shadow-sm"
                 >
                   <div>
-                    <div className="font-bold text-slate-800 flex items-center gap-1.5 flex-wrap">
+                    <div className="font-black text-[#013A40] flex items-center gap-2 flex-wrap">
                       <span>{timA}</span>
-                      <span className="bg-slate-100 text-slate-800 font-extrabold px-2 py-0.5 rounded-md border border-slate-200">
+                      <span className="bg-[#013A40] text-[#F8B700] font-black px-2.5 py-0.5 shape-cyber-pill border border-[#038C8C]/50 shadow-2xs">
                         {m.skor_tim_a} : {m.skor_tim_b}
                       </span>
                       <span>{timB}</span>
                       {Number(m.jumlah_shuttlecock_tambahan) > 0 && (
-                        <span className="bg-emerald-100 text-emerald-800 font-black text-[10px] px-2 py-0.5 rounded-full border border-emerald-300">
+                        <span className="bg-[#B2DCE5]/40 text-[#013A40] font-black text-[10px] px-2 py-0.5 rounded-full border border-[#038C8C]/40">
                           🏸 +{m.jumlah_shuttlecock_tambahan} Cock
                         </span>
                       )}
                     </div>
-                    <div className="text-[11px] text-slate-500 mt-1 flex items-center gap-2 flex-wrap">
+                    <div className="text-[11px] text-[#013A40]/70 mt-1 flex items-center gap-2.5 flex-wrap">
                       <span>⏱️ Durasi: <b>{m.durasi_menit} Menit</b> (Lapangan {m.lapangan})</span>
                       {m.detail_pemain_cock && (
-                        <span className="text-[10px] bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded-sm">
+                        <span className="text-[10px] bg-[#F2F2F2] text-[#013A40] px-2 py-0.5 rounded-md border border-[#B2DCE5]">
                           Cock dibebankan ke: <b>{m.detail_pemain_cock}</b>
                         </span>
                       )}
@@ -626,7 +631,7 @@ export const MatchView: React.FC<MatchViewProps> = ({
                     <div className="flex items-center gap-2">
                       <button
                         onClick={() => onOpenEditMatch(m)}
-                        className="px-2 py-1 bg-amber-500 hover:bg-amber-600 text-white rounded-md text-[11px] font-bold cursor-pointer"
+                        className="px-2.5 py-1 bg-[#F8B700] hover:bg-[#e0a500] text-[#013A40] rounded-md text-[11px] font-black cursor-pointer shadow-2xs transition"
                       >
                         ✏️ Edit
                       </button>

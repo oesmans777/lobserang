@@ -22,7 +22,7 @@ export const FloatingCompass: React.FC = () => {
   };
 
   return (
-    <div className="hidden lg:grid fixed bottom-6 left-6 w-20 h-20 bg-white/60 backdrop-blur-md rounded-full border border-slate-300 shadow-xl grid-cols-3 grid-rows-3 z-40 select-none overflow-hidden">
+    <div className="hidden lg:grid fixed bottom-6 left-6 w-20 h-20 bg-[#013A40]/90 backdrop-blur-md shape-cyber-card border-2 border-[#038C8C]/50 shadow-2xl grid-cols-3 grid-rows-3 z-40 select-none overflow-hidden">
       <div className="col-start-2 row-start-1">
         <button
           onMouseDown={() => startScroll(0, -18)}
@@ -30,7 +30,8 @@ export const FloatingCompass: React.FC = () => {
           onMouseLeave={stopScroll}
           onTouchStart={e => { e.preventDefault(); startScroll(0, -18); }}
           onTouchEnd={stopScroll}
-          className="w-full h-full flex items-center justify-center text-xs font-black text-slate-800 hover:bg-black/10 active:bg-black/20 cursor-pointer"
+          className="w-full h-full flex items-center justify-center text-xs font-black text-[#B2DCE5] hover:text-[#F8B700] hover:bg-[#038C8C]/40 active:bg-[#038C8C]/60 cursor-pointer transition"
+          title="Scroll Ke Atas"
         >
           ▲
         </button>
@@ -43,13 +44,14 @@ export const FloatingCompass: React.FC = () => {
           onMouseLeave={stopScroll}
           onTouchStart={e => { e.preventDefault(); startScroll(-18, 0); }}
           onTouchEnd={stopScroll}
-          className="w-full h-full flex items-center justify-center text-xs font-black text-slate-800 hover:bg-black/10 active:bg-black/20 cursor-pointer"
+          className="w-full h-full flex items-center justify-center text-xs font-black text-[#B2DCE5] hover:text-[#F8B700] hover:bg-[#038C8C]/40 active:bg-[#038C8C]/60 cursor-pointer transition"
+          title="Scroll Ke Kiri"
         >
           ◀
         </button>
       </div>
 
-      <div className="col-start-2 row-start-2 flex items-center justify-center opacity-30 text-sm font-bold text-slate-800 pointer-events-none">
+      <div className="col-start-2 row-start-2 flex items-center justify-center text-xs font-black text-[#F8B700] pointer-events-none drop-shadow-[0_0_6px_#F8B700]">
         ✛
       </div>
 
@@ -60,7 +62,8 @@ export const FloatingCompass: React.FC = () => {
           onMouseLeave={stopScroll}
           onTouchStart={e => { e.preventDefault(); startScroll(18, 0); }}
           onTouchEnd={stopScroll}
-          className="w-full h-full flex items-center justify-center text-xs font-black text-slate-800 hover:bg-black/10 active:bg-black/20 cursor-pointer"
+          className="w-full h-full flex items-center justify-center text-xs font-black text-[#B2DCE5] hover:text-[#F8B700] hover:bg-[#038C8C]/40 active:bg-[#038C8C]/60 cursor-pointer transition"
+          title="Scroll Ke Kanan"
         >
           ▶
         </button>
@@ -73,7 +76,8 @@ export const FloatingCompass: React.FC = () => {
           onMouseLeave={stopScroll}
           onTouchStart={e => { e.preventDefault(); startScroll(0, 18); }}
           onTouchEnd={stopScroll}
-          className="w-full h-full flex items-center justify-center text-xs font-black text-slate-800 hover:bg-black/10 active:bg-black/20 cursor-pointer"
+          className="w-full h-full flex items-center justify-center text-xs font-black text-[#B2DCE5] hover:text-[#F8B700] hover:bg-[#038C8C]/40 active:bg-[#038C8C]/60 cursor-pointer transition"
+          title="Scroll Ke Bawah"
         >
           ▼
         </button>

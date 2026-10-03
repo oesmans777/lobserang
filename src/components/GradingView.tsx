@@ -62,11 +62,11 @@ export const GradingView: React.FC<GradingViewProps> = ({
   const getKategoriBadge = (nilai: number) => {
     const v = Number(nilai) || 0;
     const colors = [
-      { bg: 'bg-red-100', text: 'text-red-700' },
-      { bg: 'bg-sky-100', text: 'text-sky-700' },
-      { bg: 'bg-emerald-100', text: 'text-emerald-700' },
-      { bg: 'bg-slate-100', text: 'text-slate-700' },
-      { bg: 'bg-amber-100', text: 'text-amber-800' }
+      { bg: 'bg-red-500/15', text: 'text-red-700', border: 'border-red-300' },
+      { bg: 'bg-[#B2DCE5]/40', text: 'text-[#013A40]', border: 'border-[#038C8C]/30' },
+      { bg: 'bg-[#038C8C]/20', text: 'text-[#038C8C]', border: 'border-[#038C8C]/40' },
+      { bg: 'bg-[#013A40]/15', text: 'text-[#013A40]', border: 'border-[#013A40]/30' },
+      { bg: 'bg-[#F8B700]/20', text: 'text-[#013A40]', border: 'border-[#F8B700]' }
     ];
 
     let foundIdx = configGrading.length - 1;
@@ -80,7 +80,7 @@ export const GradingView: React.FC<GradingViewProps> = ({
     const c = colors[foundIdx] || colors[0];
     const name = configGrading[foundIdx] ? configGrading[foundIdx].nama : 'UNKNOWN';
     return (
-      <span className={`px-2.5 py-1 rounded-full text-[10px] font-extrabold ${c.bg} ${c.text}`}>
+      <span className={`px-2.5 py-1 shape-cyber-pill text-[10px] font-black border ${c.bg} ${c.text} ${c.border}`}>
         {name}
       </span>
     );
@@ -105,27 +105,28 @@ export const GradingView: React.FC<GradingViewProps> = ({
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between border-b border-slate-200 pb-3">
-        <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2">
-          ⭐ Grading & Kualitas Pemain Database
+      <div className="flex items-center justify-between border-b border-[#B2DCE5] pb-3">
+        <h2 className="text-xl font-black text-[#013A40] flex items-center gap-2 font-sporty uppercase italic">
+          <span className="text-2xl text-[#F8B700]">⭐</span>
+          <span>Grading & Kualitas Pemain Database</span>
         </h2>
       </div>
 
       {/* NOTIFIKASI CERDAS REKOMENDASI PENYESUAIAN KELAS */}
       {smartNotifications.length > 0 && (
-        <div className="bg-white border-2 border-emerald-500 rounded-xl p-4 shadow-sm space-y-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2 text-xs font-black text-emerald-950 uppercase tracking-wide">
-              <span>▲</span>
-              <span>💡 Rekomendasi Penyesuaian Kelas Mabar Otomatis</span>
-              <span className="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2 py-0.5 rounded-full border border-emerald-300">
+        <div className="bg-white border-2 border-[#038C8C]/40 shape-cyber-card p-4 sm:p-5 shadow-sm space-y-3 relative overflow-hidden">
+          <div className="flex items-center justify-between flex-wrap gap-2">
+            <div className="flex items-center gap-2 text-xs font-black text-[#013A40] uppercase tracking-wide font-tech">
+              <span className="text-base text-[#F8B700]">⚡</span>
+              <span>Rekomendasi Penyesuaian Kelas Mabar Otomatis</span>
+              <span className="bg-[#B2DCE5]/40 text-[#013A40] text-[10px] font-black px-2.5 py-0.5 rounded-full border border-[#038C8C]/30">
                 {smartNotifications.length} Pemain
               </span>
             </div>
             {userRole === 'admin' && (
               <button
                 onClick={onApplyAllRecommendations}
-                className="text-xs font-bold bg-linear-to-r from-cyan-600 to-blue-600 text-white px-3 py-1 rounded-md shadow-xs hover:opacity-90 transition cursor-pointer"
+                className="text-xs font-black bg-linear-to-r from-[#013A40] to-[#038C8C] hover:from-[#038C8C] hover:to-[#013A40] text-white px-3.5 py-1.5 shape-cyber-card shadow-xs transition cursor-pointer border border-[#B2DCE5]/40"
               >
                 ⚡ Terapkan Semua
               </button>
@@ -136,19 +137,19 @@ export const GradingView: React.FC<GradingViewProps> = ({
             {smartNotifications.map(item => (
               <div
                 key={item.nama}
-                className="flex items-center justify-between p-2 bg-slate-50 border border-slate-200 rounded-lg text-xs"
+                className="flex items-center justify-between p-2.5 bg-[#F2F2F2] border border-[#B2DCE5] shape-cyber-card text-xs"
               >
-                <div className="font-semibold text-slate-700">
-                  <span className={item.diff > 0 ? 'text-emerald-600 font-bold' : 'text-red-500 font-bold'}>
+                <div className="font-bold text-[#013A40]">
+                  <span className={item.diff > 0 ? 'text-[#038C8C] font-black' : 'text-red-500 font-black'}>
                     {item.diff > 0 ? '▲' : '▼'}
                   </span>{' '}
                   <b>{item.nama}</b> ({item.curr.toFixed(1)} →{' '}
-                  <span className="font-extrabold text-blue-600">{item.rec.toFixed(1)}</span>)
+                  <span className="font-black text-[#038C8C]">{item.rec.toFixed(1)}</span>)
                 </div>
                 {userRole === 'admin' && (
                   <button
                     onClick={() => onUpdateGrading(item.nama, item.rec)}
-                    className="text-[11px] font-bold px-2.5 py-0.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-md cursor-pointer"
+                    className="text-[11px] font-black px-3 py-1 bg-[#F8B700] hover:bg-[#e0a500] text-[#013A40] rounded-md cursor-pointer shadow-2xs transition"
                   >
                     Set {item.rec.toFixed(1)}
                   </button>
@@ -160,13 +161,16 @@ export const GradingView: React.FC<GradingViewProps> = ({
       )}
 
       {/* PENGATURAN RANGE KATEGORI LEVEL */}
-      <div className="bg-white border border-blue-400 rounded-xl overflow-hidden shadow-2xs">
+      <div className="bg-white border-2 border-[#038C8C]/30 shape-cyber-card overflow-hidden shadow-2xs">
         <button
           onClick={() => setShowConfig(!showConfig)}
-          className="w-full flex items-center justify-between p-3.5 bg-blue-50 text-blue-900 font-bold text-xs cursor-pointer hover:bg-blue-100 transition"
+          className="w-full flex items-center justify-between p-3.5 bg-linear-to-r from-[#013A40] to-[#00272B] text-white font-black text-xs cursor-pointer hover:bg-[#013A40] transition font-tech tracking-wider uppercase"
         >
-          <span>⚙️ Pengaturan Nama & Range Kategori Level</span>
-          <span>{showConfig ? '➖' : '➕'}</span>
+          <span className="flex items-center gap-2">
+            <span className="text-[#F8B700]">⚙️</span>
+            <span>Pengaturan Nama & Range Kategori Level</span>
+          </span>
+          <span className="text-[#F8B700]">{showConfig ? '➖' : '➕'}</span>
         </button>
 
         {showConfig && (
@@ -213,7 +217,7 @@ export const GradingView: React.FC<GradingViewProps> = ({
 
             <button
               onClick={() => onUpdateConfigGrading(tempConfigs)}
-              className="w-full py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md font-bold text-xs cursor-pointer transition shadow-2xs"
+              className="w-full py-2 bg-[#038C8C] hover:bg-[#013A40] text-white shape-cyber-card font-black text-xs cursor-pointer transition shadow-2xs border border-[#B2DCE5]/40"
             >
               💾 Simpan & Terapkan Kategori
             </button>
@@ -224,11 +228,11 @@ export const GradingView: React.FC<GradingViewProps> = ({
       {/* FILTER & HEADER */}
       <div className="flex items-center justify-between flex-wrap gap-2">
         <div className="flex items-center gap-2">
-          <span className="text-xs font-bold text-slate-600">Filter Level:</span>
+          <span className="text-xs font-black text-[#013A40] uppercase font-tech tracking-wider">Filter Level:</span>
           <select
             value={filterLevel}
             onChange={e => setFilterLevel(e.target.value)}
-            className="p-1.5 bg-white border border-slate-300 rounded-md text-xs font-bold text-slate-700 cursor-pointer"
+            className="p-1.5 bg-white border border-[#B2DCE5] focus:border-[#038C8C] shape-cyber-card text-xs font-bold text-[#013A40] cursor-pointer focus:outline-hidden"
           >
             <option value="semua">📋 Semua Level</option>
             {configGrading.map((c, idx) => (
@@ -241,37 +245,37 @@ export const GradingView: React.FC<GradingViewProps> = ({
 
         <button
           onClick={onApplyAllRecommendations}
-          className="text-xs font-bold bg-linear-to-r from-cyan-600 to-blue-600 text-white px-3.5 py-1.5 rounded-md shadow-xs hover:opacity-90 transition cursor-pointer"
+          className="text-xs font-black bg-linear-to-r from-[#013A40] to-[#038C8C] hover:from-[#038C8C] hover:to-[#013A40] text-white px-3.5 py-1.5 shape-cyber-card shadow-xs transition cursor-pointer border border-[#B2DCE5]/40"
         >
           ⚡ Terapkan Semua Rekomendasi
         </button>
       </div>
 
       {/* TABEL PEMAIN */}
-      <div className="overflow-x-auto border border-slate-200 rounded-xl shadow-xs bg-white">
+      <div className="overflow-x-auto border-2 border-[#038C8C]/30 shape-cyber-card shadow-xs bg-white">
         <table className="w-full text-center text-xs border-collapse">
           <thead>
-            <tr className="bg-slate-50 text-slate-500 uppercase font-bold text-[11px] border-b-2 border-slate-200">
-              <th className="py-2.5 px-2 w-12">Pos</th>
-              <th className="py-2.5 px-3 text-left w-48">Nama Anggota</th>
-              <th className="py-2.5 px-3 w-36">Grading Skor</th>
-              <th className="py-2.5 px-3 w-40">Rekomendasi</th>
-              <th className="py-2.5 px-3 w-40">Kategori Level</th>
+            <tr className="bg-[#013A40] text-[#F2F2F2] uppercase font-black text-[11px] border-b-2 border-[#038C8C]/50 font-tech tracking-wider">
+              <th className="py-3 px-2 w-12">Pos</th>
+              <th className="py-3 px-3 text-left w-48">Nama Anggota</th>
+              <th className="py-3 px-3 w-36">Grading Skor</th>
+              <th className="py-3 px-3 w-40">Rekomendasi</th>
+              <th className="py-3 px-3 w-40">Kategori Level</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-100">
+          <tbody className="divide-y divide-[#B2DCE5]/40 font-medium">
             {filteredList.map((p, idx) => {
               const rec = getRecommendation(p.nama_pemain);
               const diff = Number((rec - p.nilai_grading).toFixed(1));
 
               return (
-                <tr key={p.nama_pemain} className="hover:bg-slate-50 transition">
+                <tr key={p.nama_pemain} className="hover:bg-[#B2DCE5]/15 transition">
                   <td className="py-2.5 px-2">
-                    <span className="inline-flex items-center justify-center w-6 h-6 rounded-md font-bold bg-slate-100 text-slate-600">
+                    <span className="inline-flex items-center justify-center w-6 h-6 shape-cyber-card font-black text-xs bg-[#F2F2F2] text-[#013A40] border border-[#B2DCE5]">
                       {idx + 1}
                     </span>
                   </td>
-                  <td className="py-2.5 px-3 text-left font-bold text-slate-800">{p.nama_pemain}</td>
+                  <td className="py-2.5 px-3 text-left font-black text-[#013A40] uppercase tracking-wide">{p.nama_pemain}</td>
                   <td className="py-2.5 px-3">
                     {userRole === 'admin' ? (
                       <input
@@ -281,32 +285,32 @@ export const GradingView: React.FC<GradingViewProps> = ({
                         max="10"
                         value={p.nilai_grading}
                         onChange={e => onUpdateGrading(p.nama_pemain, Number(e.target.value))}
-                        className="w-16 p-1 text-center font-extrabold text-blue-600 border border-slate-300 rounded-md bg-slate-50"
+                        className="w-16 p-1 text-center font-mono font-black text-[#038C8C] border border-[#B2DCE5] focus:border-[#038C8C] rounded-lg bg-[#F2F2F2] focus:outline-hidden"
                       />
                     ) : (
-                      <span className="font-extrabold text-blue-600 text-sm">{p.nilai_grading.toFixed(1)}</span>
+                      <span className="font-mono font-black text-[#038C8C] text-sm">{p.nilai_grading.toFixed(1)}</span>
                     )}
                   </td>
                   <td className="py-2.5 px-3">
                     {Math.abs(diff) >= 0.1 ? (
                       <div className="flex items-center justify-center gap-1.5">
-                        <span className={`font-black text-xs ${diff > 0 ? 'text-emerald-600' : 'text-red-500'}`}>
+                        <span className={`font-black text-xs ${diff > 0 ? 'text-[#038C8C]' : 'text-red-500'}`}>
                           {diff > 0 ? `▲ +${diff}` : `▼ ${diff}`}
                         </span>
-                        <span className="bg-emerald-50 text-emerald-700 font-extrabold px-1.5 py-0.5 rounded-sm text-[11px]">
+                        <span className="bg-[#B2DCE5]/40 text-[#013A40] font-black px-2 py-0.5 rounded-md text-[11px] border border-[#038C8C]/30">
                           ⚡ {rec.toFixed(1)}
                         </span>
                         {userRole === 'admin' && (
                           <button
                             onClick={() => onUpdateGrading(p.nama_pemain, rec)}
-                            className="bg-blue-600 hover:bg-blue-700 text-white font-bold text-[10px] px-2 py-0.5 rounded-sm cursor-pointer"
+                            className="bg-[#F8B700] hover:bg-[#e0a500] text-[#013A40] font-black text-[10px] px-2 py-0.5 rounded-md cursor-pointer shadow-2xs transition"
                           >
                             Set
                           </button>
                         )}
                       </div>
                     ) : (
-                      <span className="text-slate-400 font-semibold text-xs">Akurat</span>
+                      <span className="text-[#013A40]/40 font-semibold text-xs">Akurat</span>
                     )}
                   </td>
                   <td className="py-2.5 px-3">{getKategoriBadge(p.nilai_grading)}</td>

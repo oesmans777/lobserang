@@ -27,7 +27,6 @@ import { PaymentKasView } from './components/PaymentKasView';
 import { CumulativeView } from './components/CumulativeView';
 import { MadingView } from './components/MadingView';
 import { GradingView } from './components/GradingView';
-import { GasExportModal } from './components/GasExportModal';
 import { PosterExportModal } from './components/PosterExportModal';
 import { ExportExcelModal } from './components/ExportExcelModal';
 import { ImportExcelModal } from './components/ImportExcelModal';
@@ -59,7 +58,6 @@ export default function App() {
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   // Modals state
-  const [isGasModalOpen, setIsGasModalOpen] = useState(false);
   const [isPosterModalOpen, setIsPosterModalOpen] = useState(false);
   const [isExcelModalOpen, setIsExcelModalOpen] = useState(false);
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
@@ -72,7 +70,7 @@ export default function App() {
   const [currentSession, setCurrentSession] = useState<SesiMabar>({
     sesi_id: 'SESI-' + new Date().toISOString().slice(0, 10),
     tanggal_sesi: new Date().toISOString().slice(0, 10),
-    judul_sesi: 'Mabar Badminton TaheSquat',
+    judul_sesi: 'Mabar Badminton LOB SERANG',
     jumlah_lapangan: 2,
     biaya_lapangan_per_pemain: 10000,
     biaya_shuttlecock_per_pemain: 3000,
@@ -1007,15 +1005,15 @@ export default function App() {
   };
 
   return (
-    <div className="flex h-screen overflow-hidden bg-slate-100 font-sans text-slate-800">
+    <div className="flex h-screen overflow-hidden bg-futuristic-mesh font-sans text-[#013A40]">
       {/* LOGIN OVERLAY */}
       {!userRole && <LoginScreen onLoginSuccess={handleLoginSuccess} />}
 
       {/* TOAST NOTIFICATION */}
       {toastMessage && (
-        <div className="fixed bottom-5 right-5 bg-slate-900 text-white px-5 py-3 rounded-xl shadow-2xl z-50 flex items-center gap-2 border-l-4 border-emerald-400 text-xs font-bold animate-in fade-in slide-in-from-right-5 duration-200">
-          <span>📢</span>
-          <span>{toastMessage}</span>
+        <div className="fixed bottom-5 right-5 bg-[#013A40] text-[#F2F2F2] px-5 py-3 rounded-xl shadow-2xl z-50 flex items-center gap-2.5 border-l-4 border-[#F8B700] text-xs font-extrabold animate-in fade-in slide-in-from-right-5 duration-200">
+          <span className="text-base text-[#F8B700]">📢</span>
+          <span className="tracking-wide">{toastMessage}</span>
         </div>
       )}
 
@@ -1027,7 +1025,6 @@ export default function App() {
         onSelectTab={handleSelectTab}
         onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
         onLogout={handleLogout}
-        onOpenGasCode={() => setIsGasModalOpen(true)}
       />
 
       {/* MAIN CONTENT AREA */}
@@ -1044,7 +1041,6 @@ export default function App() {
           onOpenImport={() => setIsImportModalOpen(true)}
           onOpenSelesai={() => setIsSelesaiModalOpen(true)}
           onOpenReset={() => setIsResetModalOpen(true)}
-          onOpenGasCode={() => setIsGasModalOpen(true)}
         />
 
         <main className="content-body flex-1 p-3.5 sm:p-5 md:p-6 pb-24 md:pb-8 overflow-y-auto">
@@ -1125,19 +1121,20 @@ export default function App() {
             />
           )}
 
-          {/* CORPORATE FOOTER WATERMARK */}
-          <footer className="mt-14 pt-6 pb-4 border-t border-slate-200/80 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-2 select-none">
-            <div className="flex items-center gap-2 flex-wrap justify-center">
-              <span className="font-sporty font-black text-slate-800 tracking-wider uppercase italic">
-                LOB SERANG
+          {/* FUTURISTIC WATERMARK FOOTER */}
+          <footer className="mt-14 pt-6 pb-4 border-t border-[#B2DCE5] flex flex-col sm:flex-row items-center justify-between text-xs text-[#013A40]/70 gap-2 select-none">
+            <div className="flex items-center gap-2.5 flex-wrap justify-center">
+              <span className="font-sporty font-black text-[#013A40] tracking-wider uppercase italic drop-shadow-xs">
+                LOB <span className="text-[#038C8C]">SERANG</span>
               </span>
-              <span className="text-slate-300">·</span>
-              <span className="font-semibold text-slate-600">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#F8B700]"></span>
+              <span className="font-bold text-[#013A40] tracking-wide">
                 created by : TAHESQUAT Badminton System 2.0
               </span>
             </div>
-            <div className="text-[11px] text-slate-400">
-              Platform Manajemen Member & Mabar Terintegrasi Google Sheets
+            <div className="text-[11px] font-semibold text-[#038C8C] flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-[#038C8C]/40"></span>
+              <span>Platform Manajemen Member & Mabar Terintegrasi Google Sheets</span>
             </div>
           </footer>
         </main>
@@ -1154,11 +1151,6 @@ export default function App() {
       </div>
 
       {/* ALL MODALS */}
-      <GasExportModal
-        isOpen={isGasModalOpen}
-        onClose={() => setIsGasModalOpen(false)}
-      />
-
       <PosterExportModal
         isOpen={isPosterModalOpen}
         onClose={() => setIsPosterModalOpen(false)}

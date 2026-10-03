@@ -149,38 +149,47 @@ export const PosterExportModal: React.FC<PosterExportModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl text-center space-y-4">
-        <h3 className="text-lg font-bold text-slate-800 flex items-center justify-center gap-2">
-          🖼️ Unduh Klasemen (Gambar JPG)
+    <div className="fixed inset-0 bg-[#013A40]/80 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+      <div className="bg-[#F2F2F2] border-2 border-[#038C8C]/50 shape-cyber-card max-w-md w-full p-6 shadow-2xl text-center space-y-4 animate-in fade-in zoom-in-95 duration-200">
+        <div className="w-14 h-14 shape-cyber-card bg-linear-to-br from-[#038C8C] to-[#013A40] text-white text-2xl flex items-center justify-center mx-auto shadow-md border border-[#B2DCE5]/40">
+          <span className="drop-shadow-[0_0_8px_#F8B700]">🖼️</span>
+        </div>
+        <h3 className="text-base font-black text-[#013A40] uppercase font-tech tracking-wider flex items-center justify-center gap-2">
+          <span>Unduh Klasemen (Poster JPG)</span>
         </h3>
-        <p className="text-xs text-slate-500">
+        <p className="text-xs text-[#013A40]/70 font-medium">
           Pilih data klasemen yang ingin diekspor menjadi poster infografis JPG E-Sport resolusi tinggi:
         </p>
 
         <div className="space-y-2.5">
           <button
             onClick={() => setJenis('hari-ini')}
-            className={`w-full p-3.5 rounded-xl border text-left cursor-pointer transition ${
+            className={`w-full p-3.5 shape-cyber-card border text-left cursor-pointer transition shadow-2xs ${
               jenis === 'hari-ini'
-                ? 'bg-emerald-50 border-emerald-500 text-emerald-950 shadow-xs'
-                : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100'
+                ? 'bg-[#B2DCE5]/30 border-[#038C8C] text-[#013A40] shadow-xs'
+                : 'bg-white border-[#B2DCE5] text-[#013A40] hover:bg-[#B2DCE5]/20'
             }`}
           >
-            <h4 className="font-extrabold text-sm mb-0.5">🟢 Klasemen Hari Ini (Poster)</h4>
-            <p className="text-xs text-slate-500">Ekspor klasemen mabar aktif yang berlangsung hari ini.</p>
+            <h4 className="font-black text-sm mb-0.5 flex items-center gap-2">
+              <span className="w-2.5 h-2.5 rounded-full bg-[#038C8C]"></span>
+              <span>Klasemen Hari Ini (Poster)</span>
+            </h4>
+            <p className="text-xs text-[#013A40]/70">Ekspor klasemen mabar aktif yang berlangsung hari ini.</p>
           </button>
 
           <button
             onClick={() => setJenis('kumulatif')}
-            className={`w-full p-3.5 rounded-xl border text-left cursor-pointer transition ${
+            className={`w-full p-3.5 shape-cyber-card border text-left cursor-pointer transition shadow-2xs ${
               jenis === 'kumulatif'
-                ? 'bg-blue-50 border-blue-500 text-blue-950 shadow-xs'
-                : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100'
+                ? 'bg-[#B2DCE5]/30 border-[#038C8C] text-[#013A40] shadow-xs'
+                : 'bg-white border-[#B2DCE5] text-[#013A40] hover:bg-[#B2DCE5]/20'
             }`}
           >
-            <h4 className="font-extrabold text-sm mb-0.5">🔵 Klasemen Kumulatif All-Time (Poster)</h4>
-            <p className="text-xs text-slate-500">Ekspor visual performa akumulasi seluruh sesi mabar historis.</p>
+            <h4 className="font-black text-sm mb-0.5 flex items-center gap-2">
+              <span className="w-2.5 h-2.5 rounded-full bg-[#F8B700]"></span>
+              <span>Klasemen Kumulatif All-Time (Poster)</span>
+            </h4>
+            <p className="text-xs text-[#013A40]/70">Ekspor visual performa akumulasi seluruh sesi mabar historis.</p>
           </button>
         </div>
 
@@ -190,17 +199,17 @@ export const PosterExportModal: React.FC<PosterExportModalProps> = ({
           </div>
         )}
 
-        <div className="flex gap-2 justify-end pt-3 border-t">
+        <div className="flex gap-2 justify-end pt-3 border-t border-[#B2DCE5]">
           <button
             onClick={onClose}
-            className="px-4 py-2 bg-slate-200 text-slate-700 rounded-lg font-bold text-xs cursor-pointer"
+            className="px-4 py-2 bg-white hover:bg-slate-200 text-[#013A40] shape-cyber-card font-bold text-xs cursor-pointer border border-[#B2DCE5] transition"
           >
             Batal
           </button>
           <button
             onClick={handleDownloadImage}
             disabled={isProcessing}
-            className="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-bold text-xs cursor-pointer transition shadow-xs flex items-center gap-1.5"
+            className="px-5 py-2 bg-linear-to-r from-[#013A40] to-[#038C8C] hover:from-[#038C8C] hover:to-[#013A40] text-white shape-cyber-card font-black text-xs cursor-pointer transition shadow-md flex items-center gap-1.5 border border-[#B2DCE5]/40"
           >
             {isProcessing ? 'Memproses JPG...' : '📥 Unduh Gambar JPG'}
           </button>

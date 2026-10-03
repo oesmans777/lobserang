@@ -177,12 +177,15 @@ export const ExportExcelModal: React.FC<ExportExcelModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl text-center space-y-4">
-        <h3 className="text-lg font-bold text-slate-800 flex items-center justify-center gap-2">
-          📊 Unduh Laporan Spreadsheet (.xlsx / .csv)
+    <div className="fixed inset-0 bg-[#013A40]/80 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+      <div className="bg-[#F2F2F2] border-2 border-[#038C8C]/50 shape-cyber-card max-w-md w-full p-6 shadow-2xl text-center space-y-4 animate-in fade-in zoom-in-95 duration-200">
+        <div className="w-14 h-14 shape-cyber-card bg-linear-to-br from-[#038C8C] to-[#013A40] text-white text-2xl flex items-center justify-center mx-auto shadow-md border border-[#B2DCE5]/40">
+          <span className="drop-shadow-[0_0_8px_#F8B700]">📊</span>
+        </div>
+        <h3 className="text-base font-black text-[#013A40] uppercase font-tech tracking-wider flex items-center justify-center gap-2">
+          <span>Unduh Laporan Spreadsheet (.xlsx / .csv)</span>
         </h3>
-        <p className="text-xs text-slate-500">
+        <p className="text-xs text-[#013A40]/70 font-medium">
           Pilih data yang ingin Anda unduh ke format Excel spreadsheet:
         </p>
 
@@ -196,12 +199,13 @@ export const ExportExcelModal: React.FC<ExportExcelModalProps> = ({
           <button
             onClick={exportHariIni}
             disabled={isExporting}
-            className="w-full p-3.5 rounded-xl border border-slate-200 bg-emerald-50 hover:bg-emerald-100/70 text-left cursor-pointer transition shadow-2xs"
+            className="w-full p-3.5 shape-cyber-card border border-[#038C8C]/40 bg-white hover:bg-[#B2DCE5]/20 text-left cursor-pointer transition shadow-2xs group"
           >
-            <h4 className="font-extrabold text-sm text-emerald-900 mb-0.5">
-              🟢 Rekap Aktivitas, Kas & Shuttlecock Hari Ini
+            <h4 className="font-black text-sm text-[#013A40] mb-0.5 flex items-center gap-2">
+              <span className="w-2.5 h-2.5 rounded-full bg-[#038C8C]"></span>
+              <span>Rekap Aktivitas, Kas & Shuttlecock Hari Ini</span>
             </h4>
-            <p className="text-xs text-emerald-700">
+            <p className="text-xs text-[#013A40]/70">
               Rincian biaya lapangan, shuttlecock dasar, shuttlecock tambahan, kas tunai/QRIS, serta data pemain.
             </p>
           </button>
@@ -209,21 +213,22 @@ export const ExportExcelModal: React.FC<ExportExcelModalProps> = ({
           <button
             onClick={exportKumulatif}
             disabled={isExporting}
-            className="w-full p-3.5 rounded-xl border border-slate-200 bg-blue-50 hover:bg-blue-100/70 text-left cursor-pointer transition shadow-2xs"
+            className="w-full p-3.5 shape-cyber-card border border-[#038C8C]/40 bg-white hover:bg-[#B2DCE5]/20 text-left cursor-pointer transition shadow-2xs group"
           >
-            <h4 className="font-extrabold text-sm text-blue-900 mb-0.5">
-              🔵 Rekap All Kumulatif Seluruh Sesi
+            <h4 className="font-black text-sm text-[#013A40] mb-0.5 flex items-center gap-2">
+              <span className="w-2.5 h-2.5 rounded-full bg-[#F8B700]"></span>
+              <span>Rekap All Kumulatif Seluruh Sesi</span>
             </h4>
-            <p className="text-xs text-blue-700">
+            <p className="text-xs text-[#013A40]/70">
               Akumulasi performa all-time seluruh sesi mabar, ranking poin, dan riwayat kehadiran.
             </p>
           </button>
         </div>
 
-        <div className="flex justify-end pt-3 border-t">
+        <div className="flex justify-end pt-3 border-t border-[#B2DCE5]">
           <button
             onClick={onClose}
-            className="px-4 py-2 bg-slate-200 text-slate-700 rounded-lg font-bold text-xs cursor-pointer"
+            className="px-4 py-2 bg-white hover:bg-slate-200 text-[#013A40] shape-cyber-card font-bold text-xs cursor-pointer border border-[#B2DCE5] transition"
           >
             Tutup
           </button>

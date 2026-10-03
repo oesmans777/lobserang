@@ -98,25 +98,26 @@ export const MadingView: React.FC<MadingViewProps> = ({
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between border-b border-slate-200 pb-3 flex-wrap gap-2">
+      <div className="flex items-center justify-between border-b border-[#B2DCE5] pb-3 flex-wrap gap-2">
         <div>
-          <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2">
-            📰 News & Update (Mading Pinboard)
+          <h2 className="text-xl font-black text-[#013A40] flex items-center gap-2 font-sporty uppercase italic">
+            <span className="text-2xl text-[#F8B700]">📰</span>
+            <span>News & Update (Mading Pinboard)</span>
           </h2>
-          <p className="text-xs text-slate-500 mt-1">
+          <p className="text-xs text-[#013A40]/70 mt-1">
             Unggah foto momen, pengumuman event, info kontak crew, sponsor, dan tautan sosial.
           </p>
         </div>
 
         <div className="flex items-center gap-2 flex-wrap">
           {/* Mode View Toggle */}
-          <div className="bg-slate-200 p-0.5 rounded-lg flex items-center text-xs font-bold">
+          <div className="bg-[#B2DCE5]/40 p-1 shape-cyber-card flex items-center text-xs font-bold border border-[#038C8C]/30">
             <button
               onClick={() => setViewMode('grid')}
-              className={`px-2.5 py-1 rounded-md transition cursor-pointer flex items-center gap-1 ${
+              className={`px-3 py-1 shape-cyber-card transition cursor-pointer flex items-center gap-1.5 ${
                 viewMode === 'grid'
-                  ? 'bg-white text-slate-900 shadow-2xs'
-                  : 'text-slate-600 hover:text-slate-900'
+                  ? 'bg-[#013A40] text-white shadow-2xs font-black'
+                  : 'text-[#013A40] hover:text-[#038C8C]'
               }`}
             >
               <span>📱</span>
@@ -124,10 +125,10 @@ export const MadingView: React.FC<MadingViewProps> = ({
             </button>
             <button
               onClick={() => setViewMode('board')}
-              className={`px-2.5 py-1 rounded-md transition cursor-pointer flex items-center gap-1 ${
+              className={`px-3 py-1 shape-cyber-card transition cursor-pointer flex items-center gap-1.5 ${
                 viewMode === 'board'
-                  ? 'bg-white text-slate-900 shadow-2xs'
-                  : 'text-slate-600 hover:text-slate-900'
+                  ? 'bg-[#013A40] text-white shadow-2xs font-black'
+                  : 'text-[#013A40] hover:text-[#038C8C]'
               }`}
             >
               <span>📌</span>
@@ -140,10 +141,10 @@ export const MadingView: React.FC<MadingViewProps> = ({
               {viewMode === 'board' && (
                 <button
                   onClick={() => setIsLocked(!isLocked)}
-                  className={`px-3 py-1.5 rounded-lg border text-xs font-bold cursor-pointer transition flex items-center gap-1.5 ${
+                  className={`px-3 py-1.5 shape-cyber-card border text-xs font-bold cursor-pointer transition flex items-center gap-1.5 ${
                     isLocked
-                      ? 'bg-white border-slate-300 text-slate-700'
-                      : 'bg-emerald-50 border-emerald-400 text-emerald-700'
+                      ? 'bg-white border-[#B2DCE5] text-[#013A40]'
+                      : 'bg-[#F8B700]/20 border-[#F8B700] text-[#013A40]'
                   }`}
                 >
                   {isLocked ? '🔒 Terkunci' : '🔓 Edit Layout'}
@@ -151,13 +152,13 @@ export const MadingView: React.FC<MadingViewProps> = ({
               )}
               <button
                 onClick={() => openAddModal('crew')}
-                className="px-3 py-1.5 bg-white hover:bg-slate-50 text-slate-800 border border-slate-300 rounded-lg text-xs font-bold cursor-pointer shadow-2xs transition"
+                className="px-3 py-1.5 bg-white hover:bg-[#F2F2F2] text-[#013A40] border border-[#B2DCE5] shape-cyber-card text-xs font-bold cursor-pointer shadow-2xs transition"
               >
                 ➕ Crew
               </button>
               <button
                 onClick={() => openAddModal('post')}
-                className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold cursor-pointer shadow-2xs transition"
+                className="px-3.5 py-1.5 bg-linear-to-r from-[#013A40] to-[#038C8C] hover:from-[#038C8C] hover:to-[#013A40] text-white shape-cyber-card text-xs font-black cursor-pointer shadow-2xs transition border border-[#B2DCE5]/30"
               >
                 ➕ Tambah Post
               </button>
@@ -175,17 +176,17 @@ export const MadingView: React.FC<MadingViewProps> = ({
             </div>
           ) : (
             madingList.map(item => {
-              let themeClasses = 'bg-linear-to-br from-amber-50 to-amber-100 text-amber-950 border-amber-300';
-              if (item.style_class === 'pin-blue') themeClasses = 'bg-linear-to-br from-sky-50 to-sky-100 text-sky-950 border-sky-300';
-              if (item.style_class === 'pin-green') themeClasses = 'bg-linear-to-br from-emerald-50 to-emerald-100 text-emerald-950 border-emerald-300';
-              if (item.style_class === 'pin-purple') themeClasses = 'bg-linear-to-br from-purple-50 to-purple-100 text-purple-950 border-purple-300';
-              if (item.style_class === 'pin-crew') themeClasses = 'bg-linear-to-br from-slate-900 to-slate-800 text-white border-cyan-400 shadow-[0_0_15px_rgba(0,243,255,0.2)]';
-              if (item.style_class === 'pin-sponsor') themeClasses = 'bg-linear-to-br from-slate-950 to-indigo-950 text-white border-amber-400 shadow-[0_0_15px_rgba(245,158,11,0.25)]';
+              let themeClasses = 'bg-linear-to-br from-[#F8B700]/15 to-[#F8B700]/30 text-[#013A40] border-[#F8B700] shadow-[0_0_12px_rgba(248,183,0,0.15)]';
+              if (item.style_class === 'pin-blue') themeClasses = 'bg-linear-to-br from-[#B2DCE5]/30 to-[#038C8C]/20 text-[#013A40] border-[#038C8C]/50 shadow-[0_0_12px_rgba(3,140,140,0.15)]';
+              if (item.style_class === 'pin-green') themeClasses = 'bg-linear-to-br from-[#038C8C]/20 to-[#013A40]/15 text-[#013A40] border-[#038C8C] shadow-[0_0_12px_rgba(3,140,140,0.2)]';
+              if (item.style_class === 'pin-purple') themeClasses = 'bg-linear-to-br from-[#013A40]/10 to-[#B2DCE5]/30 text-[#013A40] border-[#013A40]/50';
+              if (item.style_class === 'pin-crew') themeClasses = 'bg-linear-to-br from-[#013A40] to-[#00272B] text-[#F2F2F2] border-[#038C8C] shadow-[0_0_15px_rgba(3,140,140,0.3)]';
+              if (item.style_class === 'pin-sponsor') themeClasses = 'bg-linear-to-br from-[#013A40] to-[#001D20] text-white border-[#F8B700] shadow-[0_0_15px_rgba(248,183,0,0.3)]';
 
               return (
                 <div
                   key={item.mading_id}
-                  className={`p-4 rounded-2xl border-2 shadow-sm flex flex-col justify-between transition-all hover:shadow-md ${themeClasses}`}
+                  className={`p-4 shape-cyber-card border-2 shadow-sm flex flex-col justify-between transition-all hover:shadow-md ${themeClasses}`}
                 >
                   <div>
                     <div className="flex items-center justify-between border-b border-black/10 pb-2 mb-2.5">
@@ -370,49 +371,50 @@ export const MadingView: React.FC<MadingViewProps> = ({
 
       {/* MODAL FORM MADING */}
       {isModalOpen && (
-        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl p-6 max-w-md w-full shadow-2xl space-y-4">
-            <h3 className="text-base font-bold text-slate-800 border-b pb-2">
-              {selectedId ? '✏️ Edit Kartu Mading' : '➕ Tambah Kartu Mading'}
+        <div className="fixed inset-0 bg-[#013A40]/80 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+          <div className="bg-[#F2F2F2] border-2 border-[#038C8C]/50 shape-cyber-card p-6 max-w-md w-full shadow-2xl space-y-4 animate-in fade-in zoom-in-95 duration-200">
+            <h3 className="text-sm font-black text-[#013A40] border-b border-[#B2DCE5] pb-2 font-tech uppercase tracking-wider flex items-center gap-2">
+              <span>{selectedId ? '✏️' : '➕'}</span>
+              <span>{selectedId ? 'Edit Kartu Mading' : 'Tambah Kartu Mading'}</span>
             </h3>
 
             <form onSubmit={handleSubmit} className="space-y-3 text-xs">
               <div>
-                <label className="font-bold text-slate-600 block mb-1">TEMA KARTU</label>
+                <label className="font-black text-[#013A40] block mb-1 uppercase text-[10px]">TEMA KARTU</label>
                 <select
                   value={styleClass}
                   onChange={e => setStyleClass(e.target.value as any)}
-                  className="w-full p-2 border border-slate-300 rounded-md font-semibold"
+                  className="w-full p-2 bg-white border border-[#B2DCE5] focus:border-[#038C8C] shape-cyber-card font-bold text-[#013A40] focus:outline-hidden"
                 >
-                  <option value="pin-yellow">📌 Catatan Kuning</option>
-                  <option value="pin-blue">📌 Catatan Biru</option>
-                  <option value="pin-green">📌 Catatan Hijau</option>
-                  <option value="pin-purple">📌 Catatan Ungu</option>
-                  <option value="pin-crew">👤 Badge Crew (Dark)</option>
-                  <option value="pin-sponsor">💎 Banner Sponsor (Gold)</option>
+                  <option value="pin-yellow">⚡ Catatan Kuning Enerjik</option>
+                  <option value="pin-blue">🧊 Catatan Ice Teal</option>
+                  <option value="pin-green">🏸 Catatan Vibrant Teal</option>
+                  <option value="pin-purple">🌌 Catatan Dark Abyss</option>
+                  <option value="pin-crew">👤 Badge Crew (Futuristik)</option>
+                  <option value="pin-sponsor">💎 Banner Sponsor (Cyber Gold)</option>
                 </select>
               </div>
 
               {modalMode === 'post' ? (
                 <>
                   <div>
-                    <label className="font-bold text-slate-600 block mb-1">JUDUL PENGUMUMAN</label>
+                    <label className="font-black text-[#013A40] block mb-1 uppercase text-[10px]">JUDUL PENGUMUMAN</label>
                     <input
                       type="text"
                       value={title}
                       onChange={e => setTitle(e.target.value)}
                       placeholder="Judul / Tema"
-                      className="w-full p-2 border border-slate-300 rounded-md font-semibold"
+                      className="w-full p-2 bg-white border border-[#B2DCE5] focus:border-[#038C8C] shape-cyber-card font-bold text-[#013A40] focus:outline-hidden"
                       required
                     />
                   </div>
                   <div>
-                    <label className="font-bold text-slate-600 block mb-1">PESAN / DESKRIPSI</label>
+                    <label className="font-black text-[#013A40] block mb-1 uppercase text-[10px]">PESAN / DESKRIPSI</label>
                     <textarea
                       value={content}
                       onChange={e => setContent(e.target.value)}
                       placeholder="Tuliskan isi informasi di sini..."
-                      className="w-full h-24 p-2 border border-slate-300 rounded-md font-normal resize-none"
+                      className="w-full h-24 p-2 bg-white border border-[#B2DCE5] focus:border-[#038C8C] shape-cyber-card font-medium text-[#013A40] resize-none focus:outline-hidden"
                       required
                     ></textarea>
                   </div>
@@ -421,77 +423,77 @@ export const MadingView: React.FC<MadingViewProps> = ({
                 <>
                   <div className="grid grid-cols-2 gap-2">
                     <div>
-                      <label className="font-bold text-slate-600 block mb-1">JABATAN (ROLE)</label>
+                      <label className="font-black text-[#013A40] block mb-1 uppercase text-[10px]">JABATAN (ROLE)</label>
                       <input
                         type="text"
                         value={title}
                         onChange={e => setTitle(e.target.value)}
                         placeholder="Contoh: Admin 1"
-                        className="w-full p-2 border border-slate-300 rounded-md font-semibold"
+                        className="w-full p-2 bg-white border border-[#B2DCE5] focus:border-[#038C8C] shape-cyber-card font-bold text-[#013A40] focus:outline-hidden"
                         required
                       />
                     </div>
                     <div>
-                      <label className="font-bold text-slate-600 block mb-1">NAMA LENGKAP</label>
+                      <label className="font-black text-[#013A40] block mb-1 uppercase text-[10px]">NAMA LENGKAP</label>
                       <input
                         type="text"
                         value={nama}
                         onChange={e => setNama(e.target.value)}
                         placeholder="Contoh: Budi Santoso"
-                        className="w-full p-2 border border-slate-300 rounded-md font-semibold"
+                        className="w-full p-2 bg-white border border-[#B2DCE5] focus:border-[#038C8C] shape-cyber-card font-bold text-[#013A40] focus:outline-hidden"
                         required
                       />
                     </div>
                   </div>
                   <div>
-                    <label className="font-bold text-slate-600 block mb-1">INFORMASI TUGAS</label>
+                    <label className="font-black text-[#013A40] block mb-1 uppercase text-[10px]">INFORMASI TUGAS</label>
                     <input
                       type="text"
                       value={content}
                       onChange={e => setContent(e.target.value)}
                       placeholder="Contoh: Penanggung Jawab Match & Kas"
-                      className="w-full p-2 border border-slate-300 rounded-md font-semibold"
+                      className="w-full p-2 bg-white border border-[#B2DCE5] focus:border-[#038C8C] shape-cyber-card font-bold text-[#013A40] focus:outline-hidden"
                     />
                   </div>
                   <div>
-                    <label className="font-bold text-slate-600 block mb-1">HP (KONTAK WA)</label>
+                    <label className="font-black text-[#013A40] block mb-1 uppercase text-[10px]">HP (KONTAK WA)</label>
                     <input
                       type="text"
                       value={hp}
                       onChange={e => setHp(e.target.value)}
                       placeholder="Contoh: 0812-3456-7890"
-                      className="w-full p-2 border border-slate-300 rounded-md font-semibold"
+                      className="w-full p-2 bg-white border border-[#B2DCE5] focus:border-[#038C8C] shape-cyber-card font-bold text-[#013A40] focus:outline-hidden"
                     />
                   </div>
                 </>
               )}
 
               <div>
-                <label className="font-bold text-slate-600 block mb-1">LINK TAUTAN (OPSIONAL)</label>
+                <label className="font-black text-[#013A40] block mb-1 uppercase text-[10px]">LINK TAUTAN (OPSIONAL)</label>
                 <input
                   type="text"
                   value={linkUrl}
                   onChange={e => setLinkUrl(e.target.value)}
                   placeholder="https://..."
-                  className="w-full p-2 border border-slate-300 rounded-md font-semibold"
+                  className="w-full p-2 bg-white border border-[#B2DCE5] focus:border-[#038C8C] shape-cyber-card font-bold text-[#013A40] focus:outline-hidden"
                 />
               </div>
 
               <div>
-                <label className="font-bold text-slate-600 block mb-1">FOTO / GAMBAR (OPSIONAL)</label>
+                <label className="font-black text-[#013A40] block mb-1 uppercase text-[10px]">FOTO / GAMBAR (OPSIONAL)</label>
                 <input
                   type="file"
                   accept="image/*"
                   onChange={handleImageUpload}
-                  className="w-full p-1 border border-slate-300 rounded-md text-xs"
+                  className="w-full p-1 bg-white border border-[#B2DCE5] shape-cyber-card text-xs text-[#013A40]"
                 />
                 {imgUrl && (
                   <div className="mt-2 flex items-center gap-2">
-                    <img src={imgUrl} alt="preview" className="h-14 rounded-md border" />
+                    <img src={imgUrl} alt="preview" className="h-14 rounded-md border border-[#B2DCE5]" />
                     <button
                       type="button"
                       onClick={() => setImgUrl('')}
-                      className="text-red-500 font-bold text-xs"
+                      className="text-red-500 font-black text-xs hover:underline cursor-pointer"
                     >
                       Hapus Foto
                     </button>
@@ -499,7 +501,7 @@ export const MadingView: React.FC<MadingViewProps> = ({
                 )}
               </div>
 
-              <div className="flex justify-between items-center pt-3 border-t">
+              <div className="flex justify-between items-center pt-3 border-t border-[#B2DCE5]">
                 {selectedId ? (
                   <button
                     type="button"
@@ -509,7 +511,7 @@ export const MadingView: React.FC<MadingViewProps> = ({
                         setIsModalOpen(false);
                       }
                     }}
-                    className="px-3 py-2 bg-red-600 text-white rounded-md font-bold cursor-pointer"
+                    className="px-3 py-2 bg-red-600 hover:bg-red-700 text-white shape-cyber-card font-black cursor-pointer transition shadow-2xs"
                   >
                     Hapus
                   </button>
@@ -519,13 +521,13 @@ export const MadingView: React.FC<MadingViewProps> = ({
                   <button
                     type="button"
                     onClick={() => setIsModalOpen(false)}
-                    className="px-4 py-2 bg-slate-200 text-slate-700 rounded-md font-bold cursor-pointer"
+                    className="px-4 py-2 bg-white hover:bg-slate-200 text-[#013A40] shape-cyber-card font-bold cursor-pointer border border-[#B2DCE5] transition"
                   >
                     Batal
                   </button>
                   <button
                     type="submit"
-                    className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md font-bold cursor-pointer"
+                    className="px-4 py-2 bg-[#038C8C] hover:bg-[#013A40] text-white shape-cyber-card font-black cursor-pointer shadow-md transition border border-[#B2DCE5]/40"
                   >
                     Simpan
                   </button>
