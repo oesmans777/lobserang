@@ -1,0 +1,1903 @@
+<script>
+/**
+ * ============================================================================
+ * LOB SERANG 2 - CLIENT LOGIC (GOOGLE APPS SCRIPT WEB APP)
+ * Terintegrasi Google Sheets Backend melalui google.script.run
+ * ============================================================================
+ */
+
+// GLOBAL STATE
+let currentSession = null;
+let members = [];
+let kehadiranList = [];
+let pertandinganList = [];
+let statistikHarianList = [];
+let kumulatifList = [];
+let arsipSesiList = [];
+let madingItemList = [];
+let gradingPemainList = [];
+let configGrading = [
+    { nama: "🔥 PRO / ADVANCED", min: 8.5, max: 10.0 },
+    { nama: "⚡ INTERMEDIATE A", min: 7.0, max: 8.4 },
+    { nama: "🏸 INTERMEDIATE B", min: 5.5, max: 6.9 },
+    { nama: "🌱 BEGINNER", min: 4.0, max: 5.4 },
+    { nama: "⚪ NEWBIE", min: 0.0, max: 3.9 }
+];
+
+let userRole = localStorage.getItem('lobSerangRole') || null;
+let jumlahLapangan = 2;
+let filterKasAktif = 'semua';
+let filterGradingLevelAktif = 'semua';
+let timers = {};
+let stateLapangan = {};
+
+let isMadingLocked = true;
+let madingGlobalZIndex = 100;
+let madingCurrentDragId = null, madingDragOffsetX = 0, madingDragOffsetY = 0;
+let madingCurrentRotateId = null, madingRotateStartX = 0, madingRotateStartY = 0;
+let globalScrollInterval = null;
+
+// ==========================================
+// INIT APP
+// ==========================================
+document.addEventListener("DOMContentLoaded", function() {
+    checkUserAuth();
+    if (userRole) {
+        loadInitialServerData();
+    }
+});
+
+function checkUserAuth() {
+    const loginScreen = document.getElementById('login-screen');
+    const mainWrapper = document.querySelector('.main-wrapper');
+    const sidebar = document.getElementById('sidebar');
+
+    if (!userRole) {
+        loginScreen.style.display = 'flex';
+        mainWrapper.style.display = 'none';
+        sidebar.style.display = 'none';
+    } else {
+        loginScreen.style.display = 'none';
+        mainWrapper.style.display = 'flex';
+        sidebar.style.display = 'flex';
+
+        if (userRole === 'member') {
+            document.body.classList.add('role-member');
+            gantiHalaman('page-match', false);
+        } else {
+            document.body.classList.remove('role-member');
+            gantiHalaman('page-input', false);
+        }
+    }
+}
+
+function showAdminPasswordInput() {
+    document.getElementById('login-main-buttons').style.display = 'none';
+    document.getElementById('login-admin-box').style.display = 'block';
+    document.getElementById('input-admin-pass').focus();
+}
+
+function cancelLoginAdmin() {
+    document.getElementById('login-admin-box').style.display = 'none';
+    document.getElementById('login-main-buttons').style.display = 'block';
+    document.getElementById('login-error-msg').style.display = 'none';
+}
+
+function submitLoginAdmin() {
+    const pass = document.getElementById('input-admin-pass').value;
+    if (!pass) return;
+
+    showLoading("Memverifikasi Password Admin...");
+    google.script.run
+        .withSuccessHandler(function(res) {
+            hideLoading();
+            if (res.success) {
+                userRole = 'admin';
+                localStorage.setItem('lobSerangRole', 'admin');
+                checkUserAuth();
+                loadInitialServerData();
+                showToast("Login Admin Berhasil! 🔑");
+            } else {
+                const err = document.getElementById('login-error-msg');
+                err.innerText = res.message;
+                err.style.display = 'block';
+            }
+        })
+        .withFailureHandler(function(err) {
+            hideLoading();
+            alert("Gagal koneksi ke server: " + err.message);
+        })
+        .verifyAdmin(pass);
+}
+
+function loginMemberMode() {
+    userRole = 'member';
+    localStorage.setItem('lobSerangRole', 'member');
+    checkUserAuth();
+    loadInitialServerData();
+    showToast("Masuk sebagai Member (Mode Baca) 👁️");
+}
+
+function logoutApp() {
+    userRole = null;
+    localStorage.removeItem('lobSerangRole');
+    checkUserAuth();
+}
+
+// ==========================================
+// SERVER COMMUNICATOR & NOTIFIKASI
+// ==========================================
+function updateSyncStatus(status) {
+    const el = document.getElementById('cloud-sync-indicator');
+    const txt = document.getElementById('sync-text');
+    if (!el || !txt) return;
+
+    el.className = 'sync-status';
+    if (status === 'syncing') {
+        el.classList.add('syncing');
+        txt.innerText = 'Menyimpan ke Google Sheets...';
+    } else if (status === 'error') {
+        el.classList.add('error');
+        txt.innerText = 'Gagal Sinkron!';
+    } else {
+        el.classList.add('connected');
+        txt.innerText = 'Google Sheets Tersinkron';
+    }
+}
+
+function showLoading(text) {
+    const ov = document.getElementById('loading-overlay');
+    const txt = document.getElementById('loading-text');
+    if (ov && txt) {
+        txt.innerText = text || 'Memuat...';
+        ov.style.display = 'flex';
+    }
+}
+
+function hideLoading() {
+    const ov = document.getElementById('loading-overlay');
+    if (ov) ov.style.display = 'none';
+}
+
+function showToast(msg) {
+    const toast = document.getElementById('live-toast');
+    const toastMsg = document.getElementById('toast-message');
+    if (toast && toastMsg) {
+        toastMsg.innerText = msg;
+        toast.style.display = 'flex';
+        setTimeout(() => { toast.style.display = 'none'; }, 3000);
+    }
+}
+
+function loadInitialServerData() {
+    updateSyncStatus('syncing');
+    google.script.run
+        .withSuccessHandler(function(res) {
+            updateSyncStatus('connected');
+            if (res.success) {
+                currentSession = res.currentSession;
+                members = res.members || [];
+                kehadiranList = res.kehadiran || [];
+                pertandinganList = res.pertandingan || [];
+                statistikHarianList = res.statistikHarian || [];
+                kumulatifList = res.kumulatif || [];
+                arsipSesiList = res.arsipSesi || [];
+                madingItemList = res.mading || [];
+                gradingPemainList = res.gradingPemain || [];
+
+                // Konfigurasi
+                if (currentSession) {
+                    jumlahLapangan = currentSession.jumlah_lapangan || 2;
+                    document.getElementById('biaya-lapangan-input').value = currentSession.biaya_lapangan_per_pemain || 10000;
+                    document.getElementById('biaya-cock-input').value = currentSession.biaya_shuttlecock_per_pemain || 3000;
+                    kalkulasiBiayaDasar();
+                }
+
+                // Parse config grading
+                const cfgObj = res.konfigurasi ? res.konfigurasi.find(c => c.config_key === 'GRADING_LEVELS_JSON') : null;
+                if (cfgObj && cfgObj.config_value) {
+                    try { configGrading = JSON.parse(cfgObj.config_value); } catch(e){}
+                }
+
+                renderAllPanels();
+                initGradingConfigUI();
+                jalankanUlangTimerAktif();
+            } else {
+                showToast("Gagal memuat data: " + res.error);
+            }
+        })
+        .withFailureHandler(function(err) {
+            updateSyncStatus('error');
+            showToast("Koneksi Google Sheets gagal: " + err.message);
+        })
+        .getInitialData(userRole);
+}
+
+// ==========================================
+// NAVIGASI & UI SWITCHER
+// ==========================================
+function gantiHalaman(idHalaman, updateActiveState = true) {
+    if (userRole === 'member' && (idHalaman === 'page-input' || idHalaman === 'page-rekap' || idHalaman === 'page-grading')) {
+        idHalaman = 'page-match';
+    }
+
+    document.querySelectorAll('.page-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.sidebar-menu li').forEach(li => li.classList.remove('active'));
+
+    const target = document.getElementById(idHalaman);
+    if (target) target.classList.add('active');
+
+    const mapMenu = {
+        'page-input': 'menu-input',
+        'page-match': 'menu-match',
+        'page-rekap': 'menu-rekap',
+        'page-allmatch': 'menu-allmatch',
+        'page-news': 'menu-news',
+        'page-grading': 'menu-grading'
+    };
+    if (mapMenu[idHalaman]) {
+        const m = document.getElementById(mapMenu[idHalaman]);
+        if (m) m.classList.add('active');
+    }
+
+    const liveTopbar = document.getElementById('live-score-topbar');
+    if (idHalaman === 'page-allmatch' || idHalaman === 'page-grading' || idHalaman === 'page-news') {
+        liveTopbar.style.display = 'none';
+    } else {
+        liveTopbar.style.display = 'flex';
+    }
+}
+
+function toggleSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    sidebar.classList.toggle('closed');
+    const edge = document.getElementById('sidebar-edge-toggle');
+    if (edge) edge.innerText = sidebar.classList.contains('closed') ? '▶' : '◀';
+}
+
+function toggleDropdownAlat(event) {
+    event.stopPropagation();
+    document.getElementById('dropdown-alat-menu').classList.toggle('show');
+}
+window.onclick = function(e) {
+    if (!e.target.closest('.dropdown-container')) {
+        document.querySelectorAll('.dropdown-menu').forEach(d => d.classList.remove('show'));
+    }
+};
+
+// ==========================================
+// REGISTRASI & PERHITUNGAN BIAYA
+// ==========================================
+function kalkulasiBiayaDasar() {
+    const bLap = Number(document.getElementById('biaya-lapangan-input').value) || 0;
+    const bCock = Number(document.getElementById('biaya-cock-input').value) || 0;
+    const total = bLap + bCock;
+    document.getElementById('label-total-biaya-dasar').innerText = 
+        `Rp ${total.toLocaleString('id-ID')} (Rp ${bLap.toLocaleString('id-ID')} Lapangan + Rp ${bCock.toLocaleString('id-ID')} Shuttlecock)`;
+}
+
+function prosesRegistrasiNama() {
+    const text = document.getElementById('wa-text').value;
+    if (!text.trim()) return;
+
+    const bLap = Number(document.getElementById('biaya-lapangan-input').value) || 10000;
+    const bCock = Number(document.getElementById('biaya-cock-input').value) || 3000;
+
+    const lines = text.split('\n');
+    const names = [];
+    lines.forEach(l => {
+        let clean = l.replace(/^\d+[\.\-\s\)]+/, '').trim().replace(/[\d\.\-\)]+$/, '').trim().toUpperCase();
+        if (clean.length > 1) names.push(clean);
+    });
+
+    if (names.length === 0) return;
+
+    showLoading("Mendaftarkan pemain ke Google Sheets...");
+    updateSyncStatus('syncing');
+
+    google.script.run
+        .withSuccessHandler(function(res) {
+            hideLoading();
+            updateSyncStatus('connected');
+            if (res.success) {
+                document.getElementById('wa-text').value = '';
+                showToast(`Sukses: ${res.data.added.length} pemain ditambahkan! 🎉`);
+                loadInitialServerData();
+            }
+        })
+        .withFailureHandler(function(err) {
+            hideLoading();
+            updateSyncStatus('error');
+            alert("Gagal menyimpan pemain: " + err.message);
+        })
+        .savePlayersBatch({
+            sesi_id: currentSession.sesi_id,
+            biaya_lapangan: bLap,
+            biaya_shuttlecock: bCock,
+            player_names: names,
+            role: userRole
+        });
+}
+
+// ==========================================
+// ABSENSI
+// ==========================================
+function toggleAbsensi(namaPemain) {
+    if (userRole === 'member') return;
+
+    const k = kehadiranList.find(x => x.nama_pemain === namaPemain);
+    if (!k) return;
+
+    const newStatus = !k.status_hadir;
+    k.status_hadir = newStatus;
+    k.jam_kedatangan = newStatus ? getJamNow() : "";
+
+    renderKlasemenTable();
+    updateLiveNavbarStatistik();
+
+    updateSyncStatus('syncing');
+    google.script.run
+        .withSuccessHandler(function() {
+            updateSyncStatus('connected');
+            showToast(`${namaPemain} ${newStatus ? 'Hadir ⏱️' : 'Dibatalkan Hadir'}`);
+        })
+        .withFailureHandler(function(err) {
+            updateSyncStatus('error');
+            showToast("Gagal update absensi: " + err.message);
+        })
+        .updatePlayerAttendance({
+            sesi_id: currentSession.sesi_id,
+            nama_pemain: namaPemain,
+            status_hadir: newStatus,
+            role: userRole
+        });
+}
+
+// ==========================================
+// REKAP KAS & SHUTTLECOCK TAMBAHAN
+// ==========================================
+function ubahShuttlecockTambahan(namaPemain, delta) {
+    if (userRole === 'member') return;
+
+    const k = kehadiranList.find(x => x.nama_pemain === namaPemain);
+    if (!k) return;
+
+    const currentQty = Number(k.jumlah_shuttlecock_tambahan) || 0;
+    const newQty = Math.max(0, currentQty + delta);
+    k.jumlah_shuttlecock_tambahan = newQty;
+
+    // Kalkulasi
+    const bLap = Number(k.biaya_lapangan_per_pemain) || 10000;
+    const bCock = Number(k.biaya_shuttlecock_per_pemain) || 3000;
+    const tarifExtra = Number(k.biaya_shuttlecock_tambahan) || 3000;
+
+    k.subtotal_shuttlecock_tambahan = newQty * tarifExtra;
+    k.total_biaya_shuttlecock = bCock + k.subtotal_shuttlecock_tambahan;
+    k.total_tagihan = (k.metode_pembayaran === 'Sponsor') ? 0 : (bLap + k.total_biaya_shuttlecock);
+
+    if (k.status_pembayaran === 'Lunas' || k.status_pembayaran === 'Tunai' || k.status_pembayaran === 'QRIS / Transfer') {
+        k.nominal_dibayar = k.total_tagihan;
+        k.sisa_tagihan = 0;
+    } else {
+        k.sisa_tagihan = Math.max(0, k.total_tagihan - (Number(k.nominal_dibayar) || 0));
+    }
+
+    renderRekapKas();
+    kirimUpdatePembayaranServer(k);
+}
+
+function toggleStatusBayar(namaPemain) {
+    if (userRole === 'member') return;
+
+    const k = kehadiranList.find(x => x.nama_pemain === namaPemain);
+    if (!k) return;
+
+    if (k.status_pembayaran === 'Belum Bayar') {
+        k.status_pembayaran = (k.metode_pembayaran === 'QRIS') ? 'QRIS / Transfer' : 'Lunas';
+        k.nominal_dibayar = k.total_tagihan;
+        k.sisa_tagihan = 0;
+    } else {
+        k.status_pembayaran = 'Belum Bayar';
+        k.nominal_dibayar = 0;
+        k.sisa_tagihan = k.total_tagihan;
+    }
+
+    renderRekapKas();
+    kirimUpdatePembayaranServer(k);
+}
+
+function gantiMetodeBayar(namaPemain, metode) {
+    if (userRole === 'member') return;
+
+    const k = kehadiranList.find(x => x.nama_pemain === namaPemain);
+    if (!k) return;
+
+    k.metode_pembayaran = metode;
+    if (metode === 'Sponsor') {
+        k.status_pembayaran = 'Sponsor / Free';
+        k.total_tagihan = 0;
+        k.nominal_dibayar = 0;
+        k.sisa_tagihan = 0;
+    } else {
+        const bLap = Number(k.biaya_lapangan_per_pemain) || 10000;
+        k.total_tagihan = bLap + (Number(k.total_biaya_shuttlecock) || 3000);
+        if (k.status_pembayaran !== 'Belum Bayar') {
+            k.status_pembayaran = (metode === 'QRIS') ? 'QRIS / Transfer' : 'Lunas';
+            k.nominal_dibayar = k.total_tagihan;
+            k.sisa_tagihan = 0;
+        }
+    }
+
+    renderRekapKas();
+    kirimUpdatePembayaranServer(k);
+}
+
+function kirimUpdatePembayaranServer(k) {
+    updateSyncStatus('syncing');
+    google.script.run
+        .withSuccessHandler(function() {
+            updateSyncStatus('connected');
+        })
+        .withFailureHandler(function(err) {
+            updateSyncStatus('error');
+            showToast("Gagal simpan pembayaran: " + err.message);
+        })
+        .updatePayment({
+            sesi_id: currentSession.sesi_id,
+            nama_pemain: k.nama_pemain,
+            biaya_lapangan: k.biaya_lapangan_per_pemain,
+            biaya_shuttlecock: k.biaya_shuttlecock_per_pemain,
+            jumlah_shuttlecock_tambahan: k.jumlah_shuttlecock_tambahan,
+            biaya_shuttlecock_tambahan: k.biaya_shuttlecock_tambahan,
+            status_pembayaran: k.status_pembayaran,
+            metode_pembayaran: k.metode_pembayaran,
+            nominal_dibayar: k.nominal_dibayar,
+            role: userRole
+        });
+}
+
+function renderRekapKas() {
+    const list = document.getElementById('rekap-kas-list');
+    if (!list) return;
+    list.innerHTML = '';
+
+    let totalTunai = 0, totalTF = 0, totalBelum = 0;
+    let countTunai = 0, countTF = 0, countBelum = 0, countSponsor = 0, totalExtraCock = 0;
+
+    const sorted = [...kehadiranList].sort((a,b) => a.nama_pemain.localeCompare(b.nama_pemain));
+
+    sorted.forEach(k => {
+        const tagihan = Number(k.total_tagihan) || 0;
+        const dibayar = Number(k.nominal_dibayar) || 0;
+        const extraCock = Number(k.jumlah_shuttlecock_tambahan) || 0;
+        totalExtraCock += extraCock;
+
+        const isLunas = (k.status_pembayaran === 'Lunas' || k.status_pembayaran === 'Tunai' || k.status_pembayaran === 'QRIS / Transfer');
+        const isSponsor = (k.status_pembayaran === 'Sponsor / Free' || k.metode_pembayaran === 'Sponsor');
+
+        if (isSponsor) {
+            countSponsor++;
+        } else if (isLunas) {
+            if (k.metode_pembayaran === 'QRIS') {
+                totalTF += dibayar;
+                countTF++;
+            } else {
+                totalTunai += dibayar;
+                countTunai++;
+            }
+        } else {
+            totalBelum += (Number(k.sisa_tagihan) || tagihan);
+            countBelum++;
+        }
+
+        // Filter UI
+        if (filterKasAktif === 'sudah' && !(isLunas || isSponsor)) return;
+        if (filterKasAktif === 'belum' && (isLunas || isSponsor)) return;
+        if (filterKasAktif === 'tunai' && (!isLunas || k.metode_pembayaran !== 'Tunai')) return;
+        if (filterKasAktif === 'tf' && (!isLunas || k.metode_pembayaran !== 'QRIS')) return;
+        if (filterKasAktif === 'sponsor' && !isSponsor) return;
+
+        const payIcon = isSponsor ? '🤝' : (k.metode_pembayaran === 'QRIS' ? '📱' : '💵');
+        const btnClass = (isLunas || isSponsor) ? 'lunas' : 'belum';
+        const labelBtn = isSponsor ? '🤝 SPONSOR' : (isLunas ? '🟢 LUNAS' : '🔴 BELUM BAYAR');
+
+        const li = document.createElement('li');
+        li.className = `member-item ${(isLunas || isSponsor) ? 'is-paid-row' : ''}`;
+        li.innerHTML = `
+            <div class="member-info-left">
+                <div class="pay-avatar-icon">${payIcon}</div>
+                <div class="member-names-block">
+                    <div class="member-name-rekap">
+                        ${(isLunas || isSponsor) ? '<span class="check-v">✓</span>' : ''}
+                        <span>${k.nama_pemain}</span>
+                    </div>
+                    <div class="member-sub">
+                        Tagihan: <b>Rp ${tagihan.toLocaleString('id-ID')}</b> 
+                        <span style="color:#64748b; font-size:11px;">(Lap: Rp ${(Number(k.biaya_lapangan_per_pemain)||10000).toLocaleString('id-ID')} + Cock: Rp ${(Number(k.total_biaya_shuttlecock)||3000).toLocaleString('id-ID')})</span>
+                    </div>
+                    ${(() => {
+                        const matchCharges = pertandinganList.filter(m => {
+                            if (!m.jumlah_shuttlecock_tambahan || Number(m.jumlah_shuttlecock_tambahan) <= 0) return false;
+                            if (m.detail_pemain_cock) {
+                                return String(m.detail_pemain_cock).split(',').map(s => s.trim().toUpperCase()).includes(k.nama_pemain.toUpperCase());
+                            }
+                            const players = [m.tim_a_pemain_1, m.tim_a_pemain_2, m.tim_b_pemain_1, m.tim_b_pemain_2].filter(Boolean).map(s => String(s).toUpperCase());
+                            return players.includes(k.nama_pemain.toUpperCase());
+                        });
+                        if (matchCharges.length === 0) return '';
+                        return '<div style="display:flex; flex-wrap:wrap; gap:4px; margin-top:4px;"><span style="font-size:10px; font-weight:bold; color:#065f46;">🏸 Dari Match:</span>' + 
+                            matchCharges.map(mc => `<span style="background:#dcfce7; color:#166534; font-size:10px; padding:1px 6px; border-radius:4px; border:1px solid #bbf7d0;">Lap ${mc.lapangan}: +${mc.jumlah_shuttlecock_tambahan} Cock</span>`).join('') + '</div>';
+                    })()}
+                </div>
+            </div>
+
+            <div class="rekap-pay-controls">
+                <!-- Shuttlecock Tambahan Counter -->
+                <div class="shuttlecock-extra-controls admin-only" title="Shuttlecock Tambahan">
+                    <span style="font-size:11px; font-weight:700; color:#475569;">Cock +</span>
+                    <button class="btn-cock-step" onclick="ubahShuttlecockTambahan('${k.nama_pemain}', -1)">-</button>
+                    <b style="font-size:12px; min-width:16px; text-align:center;">${extraCock}</b>
+                    <button class="btn-cock-step" onclick="ubahShuttlecockTambahan('${k.nama_pemain}', 1)">+</button>
+                </div>
+
+                <select class="admin-only" onchange="gantiMetodeBayar('${k.nama_pemain}', this.value)">
+                    <option value="Tunai" ${k.metode_pembayaran === 'Tunai' ? 'selected' : ''}>💵 Tunai</option>
+                    <option value="QRIS" ${k.metode_pembayaran === 'QRIS' ? 'selected' : ''}>📱 QRIS/TF</option>
+                    <option value="Sponsor" ${k.metode_pembayaran === 'Sponsor' ? 'selected' : ''}>🤝 Sponsor</option>
+                </select>
+
+                <button class="btn-bayar-toggle ${btnClass} admin-only" onclick="toggleStatusBayar('${k.nama_pemain}')">
+                    ${labelBtn}
+                </button>
+
+                <span class="member-only-view" style="font-size:12px; font-weight:800; color:${(isLunas || isSponsor) ? '#16a34a' : '#ef4444'};">
+                    ${labelBtn}
+                </span>
+            </div>
+        `;
+        list.appendChild(li);
+    });
+
+    document.getElementById('total-tunai').innerText = `Rp ${totalTunai.toLocaleString('id-ID')}`;
+    document.getElementById('count-tunai').innerText = `(${countTunai} Orang)`;
+    document.getElementById('total-transfer').innerText = `Rp ${totalTF.toLocaleString('id-ID')}`;
+    document.getElementById('count-transfer').innerText = `(${countTF} Orang)`;
+    document.getElementById('total-belum').innerText = `Rp ${totalBelum.toLocaleString('id-ID')}`;
+    document.getElementById('count-belum').innerText = `(${countBelum} Orang)`;
+    document.getElementById('total-keseluruhan').innerText = `Rp ${(totalTunai + totalTF).toLocaleString('id-ID')}`;
+
+    document.getElementById('lbl-total-m').innerText = kehadiranList.length;
+    document.getElementById('lbl-hadir-m').innerText = kehadiranList.filter(k => k.status_hadir).length;
+    document.getElementById('lbl-lunas-m').innerText = countTunai + countTF;
+    document.getElementById('lbl-sponsor-m').innerText = countSponsor;
+    document.getElementById('lbl-total-cock-extra').innerText = `${totalExtraCock} Pcs`;
+
+    // Render Tabel Rincian Shuttlecock Tambahan per Match ID
+    renderTabelShuttlecockMatch();
+}
+
+function renderTabelShuttlecockMatch() {
+    const tbody = document.getElementById('tabel-shuttlecock-match');
+    if (!tbody) return;
+
+    const matchesWithCock = pertandinganList.filter(m => Number(m.jumlah_shuttlecock_tambahan) > 0);
+    const badge = document.getElementById('badge-total-cock-match');
+    const tfoot = document.getElementById('tfoot-shuttlecock-match');
+    const lblCock = document.getElementById('lbl-tfoot-total-cock');
+    const lblRupiah = document.getElementById('lbl-tfoot-total-rupiah');
+
+    if (matchesWithCock.length === 0) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="8" style="text-align: center; padding: 25px; color: #94a3b8; font-size: 12px;">
+                    Belum ada shuttlecock tambahan yang tercatat pada pertandingan hari ini.
+                </td>
+            </tr>
+        `;
+        if (badge) badge.innerText = "0 Shuttlecock Terintegrasi";
+        if (tfoot) tfoot.style.display = 'none';
+        return;
+    }
+
+    let totCock = 0;
+    let totRupiah = 0;
+    tbody.innerHTML = '';
+
+    matchesWithCock.forEach((m, idx) => {
+        const timA = [m.tim_a_pemain_1, m.tim_a_pemain_2].filter(Boolean).join(" / ");
+        const timB = [m.tim_b_pemain_1, m.tim_b_pemain_2].filter(Boolean).join(" / ");
+        const qty = Number(m.jumlah_shuttlecock_tambahan) || 0;
+        totCock += qty;
+
+        let charged = [];
+        if (m.detail_pemain_cock) {
+            charged = String(m.detail_pemain_cock).split(',').map(s => s.trim()).filter(Boolean);
+        } else {
+            charged = [m.tim_a_pemain_1, m.tim_a_pemain_2, m.tim_b_pemain_1, m.tim_b_pemain_2].filter(Boolean);
+        }
+
+        const pFirst = kehadiranList.find(k => k.nama_pemain.toUpperCase() === (charged[0] || '').toUpperCase());
+        const tarifCock = Number(pFirst?.biaya_shuttlecock_tambahan) || 3000;
+        const subtotal = qty * tarifCock;
+        totRupiah += subtotal;
+
+        const chipsHtml = charged.map(pName => {
+            const pData = kehadiranList.find(k => k.nama_pemain.toUpperCase() === pName.toUpperCase());
+            const isPaid = pData && (pData.status_pembayaran === 'Lunas' || pData.status_pembayaran === 'Tunai' || pData.status_pembayaran === 'QRIS / Transfer');
+            const isSponsor = pData && (pData.status_pembayaran === 'Sponsor / Free' || pData.metode_pembayaran === 'Sponsor');
+            let bg = isSponsor ? '#f3e8ff' : (isPaid ? '#ecfdf5' : '#fef2f2');
+            let clr = isSponsor ? '#7e22ce' : (isPaid ? '#065f46' : '#991b1b');
+            let border = isSponsor ? '#d8b4fe' : (isPaid ? '#a7f3d0' : '#fecaca');
+            let icon = isSponsor ? '🤝 Sponsor' : (isPaid ? '✓ Lunas' : '⏳ Belum Bayar');
+            return `<span style="display:inline-flex; align-items:center; gap:3px; background:${bg}; color:${clr}; border:1px solid ${border}; font-size:10px; font-weight:700; padding:2px 6px; border-radius:4px;">${pName} <span style="font-size:9px; opacity:0.8;">(${icon})</span></span>`;
+        }).join(' ');
+
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td style="text-align: center; font-weight: bold; color: #64748b;">${idx + 1}</td>
+            <td>
+                <span style="font-family: monospace; font-weight: bold; color: #0284c7; background: #e0f2fe; padding: 2px 6px; border-radius: 4px; font-size: 11px;">
+                    ${m.match_id}
+                </span>
+                <span style="display:block; font-size:10px; color:#94a3b8; margin-top:2px;">⏱️ ${m.durasi_menit || '-'}</span>
+            </td>
+            <td style="text-align: center; font-weight: bold;">Lap ${m.lapangan}</td>
+            <td>
+                <b>${timA}</b> 
+                <span style="background: #f1f5f9; padding: 1px 6px; border-radius: 4px; font-size: 10px; font-weight: 800; margin: 0 4px;">
+                    ${m.skor_tim_a} : ${m.skor_tim_b}
+                </span> 
+                <b>${timB}</b>
+            </td>
+            <td style="text-align: center;">
+                <span style="background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; font-weight: 800; font-size: 11px; padding: 2px 8px; border-radius: 9999px;">
+                    🏸 +${qty}
+                </span>
+            </td>
+            <td>
+                <div style="display: flex; flex-wrap: wrap; gap: 4px;">
+                    ${chipsHtml}
+                </div>
+            </td>
+            <td style="text-align: right; color: #475569;">Rp ${tarifCock.toLocaleString('id-ID')}</td>
+            <td style="text-align: right; font-weight: 800; color: #059669;">Rp ${subtotal.toLocaleString('id-ID')}</td>
+        `;
+        tbody.appendChild(tr);
+    });
+
+    if (badge) badge.innerText = `${totCock} Shuttlecock Terintegrasi`;
+    if (tfoot) {
+        tfoot.style.display = '';
+        if (lblCock) lblCock.innerText = `+${totCock} Cock`;
+        if (lblRupiah) lblRupiah.innerText = `Rp ${totRupiah.toLocaleString('id-ID')}`;
+    }
+}
+
+function setFilterKas(val) {
+    filterKasAktif = val;
+    renderRekapKas();
+}
+
+// ==========================================
+// KLASEMEN HARIAN & TIMER PERTANDINGAN
+// ==========================================
+function renderKlasemenTable() {
+    const tbody = document.getElementById('tabel-klasemen');
+    if (!tbody) return;
+    tbody.innerHTML = '';
+
+    // Ambil data statistik dari server / lokal
+    const playerMap = {};
+    kehadiranList.forEach(k => {
+        playerMap[k.nama_pemain] = {
+            nama: k.nama_pemain,
+            hadir: k.status_hadir,
+            jamDatang: k.jam_kedatangan || "",
+            main: 0, menang: 0, kalah: 0,
+            skorMenang: 0, skorKalah: 0, selisihSkor: 0, poin: 0,
+            durasiDetik: 0, form: []
+        };
+    });
+
+    // Hitung ulang dari pertandingan sesi aktif
+    pertandinganList.forEach(m => {
+        const pA = [m.tim_a_pemain_1, m.tim_a_pemain_2].filter(Boolean);
+        const pB = [m.tim_b_pemain_1, m.tim_b_pemain_2].filter(Boolean);
+        const sA = Number(m.skor_tim_a) || 0;
+        const sB = Number(m.skor_tim_b) || 0;
+        const pemenang = m.pemenang;
+
+        let dSec = 0;
+        if (m.durasi_menit && m.durasi_menit.includes(":")) {
+            const parts = m.durasi_menit.split(":");
+            dSec = (Number(parts[0]) || 0) * 60 + (Number(parts[1]) || 0);
+        }
+
+        pA.forEach(name => {
+            if (!playerMap[name]) return;
+            const p = playerMap[name];
+            p.main++;
+            p.skorMenang += sA;
+            p.skorKalah += sB;
+            p.durasiDetik += dSec;
+            if (pemenang === 'A') { p.menang++; p.poin += 3; p.form.push('M'); }
+            else if (pemenang === 'B') { p.kalah++; p.form.push('K'); }
+            p.selisihSkor = p.skorMenang - p.skorKalah;
+        });
+
+        pB.forEach(name => {
+            if (!playerMap[name]) return;
+            const p = playerMap[name];
+            p.main++;
+            p.skorMenang += sB;
+            p.skorKalah += sA;
+            p.durasiDetik += dSec;
+            if (pemenang === 'B') { p.menang++; p.poin += 3; p.form.push('M'); }
+            else if (pemenang === 'A') { p.kalah++; p.form.push('K'); }
+            p.selisihSkor = p.skorMenang - p.skorKalah;
+        });
+    });
+
+    const sorted = Object.values(playerMap).sort((a,b) => {
+        if (b.poin !== a.poin) return b.poin - a.poin;
+        if (b.selisihSkor !== a.selisihSkor) return b.selisihSkor - a.selisihSkor;
+        if (b.menang !== a.menang) return b.menang - a.menang;
+        return a.nama.localeCompare(b.nama);
+    });
+
+    sorted.forEach((p, idx) => {
+        const formHtml = p.form.length > 0 
+            ? '<div class="form-container">' + p.form.slice(-5).map(f => `<span class="form-dot ${f==='M'?'win':'lose'}">${f}</span>`).join('') + '</div>'
+            : '<span style="color:#cbd5e1; font-size:11px;">-</span>';
+
+        const avgSec = p.main > 0 ? Math.floor(p.durasiDetik / p.main) : 0;
+        const avgStr = padZero(Math.floor(avgSec / 60)) + ":" + padZero(avgSec % 60);
+
+        const spStr = (p.selisihSkor > 0 ? '+' : '') + p.selisihSkor;
+        const hadirClass = p.hadir ? 'is-present' : '';
+        const hadirLabel = p.hadir ? 'HADIR' : 'ABSEN';
+        const clockInfo = p.jamDatang ? `<span class="time-arrival">⏱️ ${p.jamDatang}</span>` : '';
+
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td><span class="pos-badge">${idx + 1}</span></td>
+            <td style="text-align: left; font-weight: 700; color:#1e293b;">${p.nama}</td>
+            <td>
+                <div class="absen-cell-wrapper">
+                    <button class="btn-absen-toggle ${hadirClass}" onclick="toggleAbsensi('${p.nama}')">
+                        <span class="status-dot"></span> ${hadirLabel}
+                    </button>
+                    ${clockInfo}
+                </div>
+            </td>
+            <td style="font-weight: 700;">${p.main}</td>
+            <td style="color: #16a34a; font-weight: 700;">${p.menang}</td>
+            <td style="color: #dc2626; font-weight: 700;">${p.kalah}</td>
+            <td style="color: #16a34a; font-weight: 600;">${p.skorMenang}</td>
+            <td style="color: #dc2626; font-weight: 600;">${p.skorKalah}</td>
+            <td style="color: #8b5cf6; font-weight: 700;">${spStr}</td>
+            <td style="color: #2563eb; font-weight: 800; font-size: 15px;">${p.poin}</td>
+            <td style="font-family: monospace; font-weight: 700; color: #475569;">${avgStr}</td>
+            <td>${formHtml}</td>
+            <td class="admin-only"><button style="background:none; border:none; cursor:pointer;" onclick="hapusPemainSesi('${p.nama}')">❌</button></td>
+        `;
+        tbody.appendChild(tr);
+    });
+
+    renderPapanSkor();
+    renderRiwayatMatch();
+    updateLiveNavbarStatistik();
+}
+
+function hapusPemainSesi(nama) {
+    if (userRole === 'member') return;
+    if (confirm(`Hapus ${nama} dari sesi mabar hari ini?`)) {
+        kehadiranList = kehadiranList.filter(k => k.nama_pemain !== nama);
+        renderKlasemenTable();
+        renderRekapKas();
+    }
+}
+
+// ==========================================
+// PAPAN SKOR & AUTO-DRAFT
+// ==========================================
+function tambahLapangan() {
+    if (jumlahLapangan < 10) {
+        jumlahLapangan++;
+        renderPapanSkor();
+    }
+}
+
+function kurangiLapangan() {
+    if (jumlahLapangan > 1) {
+        if (stateLapangan[jumlahLapangan] && stateLapangan[jumlahLapangan].berjalan) {
+            showToast(`Lapangan ${jumlahLapangan} sedang tanding!`);
+            return;
+        }
+        delete stateLapangan[jumlahLapangan];
+        jumlahLapangan--;
+        renderPapanSkor();
+    }
+}
+
+function dapatkanDetikElapsedTime(courtNum) {
+    const s = stateLapangan[courtNum];
+    if (!s) return 0;
+    const acc = Number(s.accumulatedTime) || 0;
+    if (s.berjalan) {
+        const st = Number(s.startTime) || Date.now();
+        const delta = Math.floor((Date.now() - st) / 1000);
+        return Math.max(0, acc + delta);
+    }
+    return acc;
+}
+
+function jalankanUlangTimerAktif() {
+    for (let k in timers) {
+        if (timers[k] && timers[k].interval) clearInterval(timers[k].interval);
+    }
+    for (let i = 1; i <= jumlahLapangan; i++) {
+        if (stateLapangan[i] && stateLapangan[i].berjalan) {
+            timers[i] = {
+                interval: setInterval(() => {
+                    const sec = dapatkanDetikElapsedTime(i);
+                    const m = padZero(Math.floor(sec / 60));
+                    const s = padZero(sec % 60);
+                    const txt = document.getElementById(`status-court-text-${i}`);
+                    if (txt) txt.innerText = `Status: Bertanding (${m}:${s})`;
+                    const mBadge = document.getElementById(`member-court-timer-${i}`);
+                    if (mBadge) mBadge.innerText = `${m}:${s}`;
+                }, 500)
+            };
+        } else {
+            timers[i] = { interval: null };
+        }
+    }
+}
+
+function renderPapanSkor() {
+    const container = document.getElementById('kontainer-lapangan');
+    if (!container) return;
+
+    if (jumlahLapangan > 1) container.classList.add('grid-layout');
+    else container.classList.remove('grid-layout');
+
+    const pemainHadir = kehadiranList.filter(k => k.status_hadir);
+    const tandingSekarang = [];
+    for (let j = 1; j <= jumlahLapangan; j++) {
+        if (stateLapangan[j]) {
+            if (stateLapangan[j].ta1) tandingSekarang.push(stateLapangan[j].ta1);
+            if (stateLapangan[j].ta2) tandingSekarang.push(stateLapangan[j].ta2);
+            if (stateLapangan[j].tb1) tandingSekarang.push(stateLapangan[j].tb1);
+            if (stateLapangan[j].tb2) tandingSekarang.push(stateLapangan[j].tb2);
+        }
+    }
+
+    container.innerHTML = '';
+
+    for (let i = 1; i <= jumlahLapangan; i++) {
+        const sLap = stateLapangan[i] || { ta1:"", ta2:"", tb1:"", tb2:"", skorA:0, skorB:0, berjalan:false, startTime:0, accumulatedTime:0, blowoutResolved:false };
+        const totalSec = dapatkanDetikElapsedTime(i);
+        const mStr = padZero(Math.floor(totalSec / 60));
+        const sStr = padZero(totalSec % 60);
+        const statusText = sLap.berjalan ? `Status: Bertanding (${mStr}:${sStr})` : "Status: Belum Mulai";
+
+        const card = document.createElement('div');
+        card.className = 'score-board-container';
+
+        if (userRole === 'member') {
+            const ta1Chip = sLap.ta1 ? `<div class="court-player-chip">${sLap.ta1}</div>` : `<div class="court-empty-slot">Kosong</div>`;
+            const ta2Chip = sLap.ta2 ? `<div class="court-player-chip">${sLap.ta2}</div>` : `<div class="court-empty-slot">Kosong</div>`;
+            const tb1Chip = sLap.tb1 ? `<div class="court-player-chip">${sLap.tb1}</div>` : `<div class="court-empty-slot">Kosong</div>`;
+            const tb2Chip = sLap.tb2 ? `<div class="court-player-chip">${sLap.tb2}</div>` : `<div class="court-empty-slot">Kosong</div>`;
+
+            card.innerHTML = `
+                <div class="court-title-bar"><div class="court-main-name">LAPANGAN ${i}</div><div class="court-status-sub" id="status-court-text-${i}">${statusText}</div></div>
+                <div class="member-court-view">
+                    <div class="court-line-horizontal"></div><div class="court-line-center"></div>
+                    <div class="court-timer-digital-badge" id="member-court-timer-${i}">${mStr}:${sStr}</div>
+                    <div class="court-side team-a"><div class="court-score-display-small">${sLap.skorA}</div>${ta1Chip}${ta2Chip}</div>
+                    <div class="court-side team-b"><div class="court-score-display-small">${sLap.skorB}</div>${tb1Chip}${tb2Chip}</div>
+                </div>
+            `;
+        } else {
+            const liveBadge = sLap.berjalan ? `<div style="position:absolute; top:10px; right:10px; background:#ef4444; color:white; font-size:10px; font-weight:800; padding:3px 8px; border-radius:12px; animation: blinker 1s linear infinite;">🔴 LIVE</div>` : ``;
+            const btnMulaiTeks = sLap.berjalan ? "⏹️ Batal" : "⏱️ Mulai";
+            const btnMulaiStyle = sLap.berjalan ? "background-color: #ef4444;" : "background-color: #2ecc71;";
+            const saveActive = sLap.berjalan ? "active" : "";
+
+            card.innerHTML = `
+                ${liveBadge}
+                <div class="court-title-bar"><div class="court-main-name">LAPANGAN ${i}</div><div class="court-status-sub" id="status-court-text-${i}">${statusText}</div></div>
+                <div class="court-body-form">
+                    <div class="team-row-box">
+                        <div class="select-players-wrapper">
+                            <select id="lap-${i}-ta1" onchange="updateCourtSlot(${i}, 'ta1', this.value)">${buildPlayerSelectOptions(pemainHadir, sLap.ta1, tandingSekarang)}</select>
+                            <select id="lap-${i}-ta2" onchange="updateCourtSlot(${i}, 'ta2', this.value)">${buildPlayerSelectOptions(pemainHadir, sLap.ta2, tandingSekarang)}</select>
+                        </div>
+                        <div class="score-input-box"><input type="number" value="${sLap.skorA}" min="0" oninput="updateCourtScore(${i}, 'skorA', this.value)"></div>
+                    </div>
+                    <div class="vs-divider-center">VS</div>
+                    <div class="team-row-box">
+                        <div class="select-players-wrapper">
+                            <select id="lap-${i}-tb1" onchange="updateCourtSlot(${i}, 'tb1', this.value)">${buildPlayerSelectOptions(pemainHadir, sLap.tb1, tandingSekarang)}</select>
+                            <select id="lap-${i}-tb2" onchange="updateCourtSlot(${i}, 'tb2', this.value)">${buildPlayerSelectOptions(pemainHadir, sLap.tb2, tandingSekarang)}</select>
+                        </div>
+                        <div class="score-input-box"><input type="number" value="${sLap.skorB}" min="0" oninput="updateCourtScore(${i}, 'skorB', this.value)"></div>
+                    </div>
+                    <div id="balance-court-${i}" class="admin-only"></div>
+                    <div class="court-cock-box admin-only" style="margin-top: 10px; background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 8px; padding: 8px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span style="font-size: 11px; font-weight: 800; color: #065f46;">🏸 Shuttlecock Tambahan:</span>
+                            <div style="display: flex; align-items: center; gap: 4px; background: #ffffff; border: 1px solid #a7f3d0; border-radius: 6px; padding: 2px 6px;">
+                                <button type="button" onclick="ubahCourtCock(${i}, -1)" style="border:none; background:#f1f5f9; border-radius:4px; font-weight:bold; cursor:pointer; width:20px; height:20px;">-</button>
+                                <span style="font-weight: 800; font-size: 12px; color: #065f46; min-width: 22px; text-align: center;">${sLap.cockTambahan || 0}</span>
+                                <button type="button" onclick="ubahCourtCock(${i}, 1)" style="border:none; background:#f1f5f9; border-radius:4px; font-weight:bold; cursor:pointer; width:20px; height:20px;">+</button>
+                            </div>
+                        </div>
+                        ${(sLap.cockTambahan || 0) > 0 ? `
+                        <div style="margin-top: 6px; font-size: 10px; color: #475569;">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                                <span>Bebankan ke pemain:</span>
+                                <span style="color: #2563eb; cursor: pointer; text-decoration: underline;" onclick="pilihSemuaBebanCock(${i})">Pilih Semua (4 Pemain)</span>
+                            </div>
+                            <div style="display: flex; flex-wrap: wrap; gap: 4px;">
+                                ${renderBebanCockChips(i)}
+                            </div>
+                        </div>` : ''}
+                    </div>
+                </div>
+                <div class="court-action-footer admin-only">
+                    <button class="btn-court-footer start" style="${btnMulaiStyle}" onclick="mulaiMatchTimer(${i})">${btnMulaiTeks}</button>
+                    <button class="btn-court-footer auto" onclick="autoDraftLapangan(${i})">🎲 Auto Draft</button>
+                    <button class="btn-court-footer save ${saveActive}" onclick="selesaikanMatchLapangan(${i})">💾 Selesai</button>
+                </div>
+            `;
+        }
+
+        container.appendChild(card);
+        if (userRole === 'admin') periksaKeseimbanganCourt(i);
+    }
+}
+
+function buildPlayerSelectOptions(listHadir, terpilih, sedangTanding) {
+    let opt = `<option value="">-- Pilih Pemain --</option>`;
+    listHadir.forEach(k => {
+        if (sedangTanding.includes(k.nama_pemain) && k.nama_pemain !== terpilih) return;
+        const sel = (k.nama_pemain === terpilih) ? 'selected' : '';
+        opt += `<option value="${k.nama_pemain}" ${sel}>${k.nama_pemain}</option>`;
+    });
+    return opt;
+}
+
+function updateCourtSlot(courtNum, slot, val) {
+    if (!stateLapangan[courtNum]) stateLapangan[courtNum] = { ta1:"", ta2:"", tb1:"", tb2:"", skorA:0, skorB:0, berjalan:false, startTime:0, accumulatedTime:0, blowoutResolved:false };
+    stateLapangan[courtNum][slot] = val;
+    renderPapanSkor();
+}
+
+function updateCourtScore(courtNum, field, val) {
+    if (!stateLapangan[courtNum]) return;
+    stateLapangan[courtNum][field] = Number(val) || 0;
+    periksaKeseimbanganCourt(courtNum);
+}
+
+function ubahCourtCock(courtNum, delta) {
+    if (!stateLapangan[courtNum]) stateLapangan[courtNum] = { ta1:"", ta2:"", tb1:"", tb2:"", skorA:0, skorB:0, berjalan:false, startTime:0, accumulatedTime:0, blowoutResolved:false };
+    const curr = stateLapangan[courtNum].cockTambahan || 0;
+    const nextVal = Math.max(0, curr + delta);
+    stateLapangan[courtNum].cockTambahan = nextVal;
+    if (!stateLapangan[courtNum].bebanCock || stateLapangan[courtNum].bebanCock.length === 0) {
+        stateLapangan[courtNum].bebanCock = [stateLapangan[courtNum].ta1, stateLapangan[courtNum].ta2, stateLapangan[courtNum].tb1, stateLapangan[courtNum].tb2].filter(Boolean);
+    }
+    renderPapanSkor();
+}
+
+function toggleBebanCockPlayer(courtNum, pName) {
+    if (!stateLapangan[courtNum]) return;
+    const list = stateLapangan[courtNum].bebanCock || [stateLapangan[courtNum].ta1, stateLapangan[courtNum].ta2, stateLapangan[courtNum].tb1, stateLapangan[courtNum].tb2].filter(Boolean);
+    if (list.includes(pName)) {
+        stateLapangan[courtNum].bebanCock = list.filter(p => p !== pName);
+    } else {
+        stateLapangan[courtNum].bebanCock = [...list, pName];
+    }
+    renderPapanSkor();
+}
+
+function pilihSemuaBebanCock(courtNum) {
+    if (!stateLapangan[courtNum]) return;
+    const s = stateLapangan[courtNum];
+    s.bebanCock = [s.ta1, s.ta2, s.tb1, s.tb2].filter(Boolean);
+    renderPapanSkor();
+}
+
+function renderBebanCockChips(courtNum) {
+    const s = stateLapangan[courtNum];
+    if (!s) return '';
+    const players = [s.ta1, s.ta2, s.tb1, s.tb2].filter(Boolean);
+    const chosen = s.bebanCock || players;
+
+    return players.map(p => {
+        const isSel = chosen.includes(p);
+        const bg = isSel ? '#059669' : '#ffffff';
+        const clr = isSel ? '#ffffff' : '#475569';
+        const border = isSel ? '#047857' : '#cbd5e1';
+        return `<button type="button" onclick="toggleBebanCockPlayer(${courtNum}, '${p}')" style="background:${bg}; color:${clr}; border:1px solid ${border}; font-size:10px; font-weight:700; padding:2px 8px; border-radius:9999px; cursor:pointer;">${isSel ? '✓ ' : '+ '}${p}</button>`;
+    }).join(' ');
+}
+
+function mulaiMatchTimer(courtNum) {
+    if (!stateLapangan[courtNum]) stateLapangan[courtNum] = { ta1:"", ta2:"", tb1:"", tb2:"", skorA:0, skorB:0, berjalan:false, startTime:0, accumulatedTime:0, blowoutResolved:false };
+    const s = stateLapangan[courtNum];
+
+    if (s.berjalan) {
+        if (timers[courtNum] && timers[courtNum].interval) clearInterval(timers[courtNum].interval);
+        s.berjalan = false;
+        s.startTime = 0;
+        s.accumulatedTime = 0;
+        renderPapanSkor();
+        showToast("Match dibatalkan ⏹️");
+        return;
+    }
+
+    if (!s.ta1 || !s.tb1) {
+        showToast("Pilih minimal 1 pemain untuk masing-masing tim!");
+        return;
+    }
+
+    s.berjalan = true;
+    s.startTime = Date.now();
+    renderPapanSkor();
+    jalankanUlangTimerAktif();
+}
+
+function selesaikanMatchLapangan(courtNum) {
+    const s = stateLapangan[courtNum];
+    if (!s || !s.berjalan) return;
+
+    if (timers[courtNum] && timers[courtNum].interval) {
+        clearInterval(timers[courtNum].interval);
+        timers[courtNum].interval = null;
+    }
+
+    const sec = dapatkanDetikElapsedTime(courtNum);
+    const durasi = padZero(Math.floor(sec / 60)) + ":" + padZero(sec % 60);
+
+    const cockQty = Number(s.cockTambahan) || 0;
+    const charged = (s.bebanCock && s.bebanCock.length > 0) ? s.bebanCock : [s.ta1, s.ta2, s.tb1, s.tb2].filter(Boolean);
+
+    const matchPayload = {
+        sesi_id: currentSession.sesi_id,
+        lapangan: courtNum,
+        tim_a_pemain_1: s.ta1,
+        tim_a_pemain_2: s.ta2 || "",
+        tim_b_pemain_1: s.tb1,
+        tim_b_pemain_2: s.tb2 || "",
+        skor_tim_a: s.skorA,
+        skor_tim_b: s.skorB,
+        durasi_menit: durasi,
+        jumlah_shuttlecock_tambahan: cockQty,
+        detail_pemain_cock: cockQty > 0 ? charged.join(", ") : "",
+        role: userRole
+    };
+
+    showLoading("Menyimpan hasil pertandingan ke Google Sheets...");
+    updateSyncStatus('syncing');
+
+    google.script.run
+        .withSuccessHandler(function(res) {
+            hideLoading();
+            updateSyncStatus('connected');
+            if (res.success) {
+                showToast("Match tersimpan! Statistik diperbarui ⚡");
+                stateLapangan[courtNum] = { ta1:"", ta2:"", tb1:"", tb2:"", skorA:0, skorB:0, berjalan:false, startTime:0, accumulatedTime:0, blowoutResolved:false };
+                loadInitialServerData();
+            }
+        })
+        .withFailureHandler(function(err) {
+            hideLoading();
+            updateSyncStatus('error');
+            alert("Gagal simpan match: " + err.message);
+        })
+        .saveMatch(matchPayload);
+}
+
+function autoDraftLapangan(courtNum) {
+    const hadir = kehadiranList.filter(k => k.status_hadir);
+    const tandingLain = [];
+    for (let j = 1; j <= jumlahLapangan; j++) {
+        if (j === courtNum) continue;
+        if (stateLapangan[j]) {
+            if (stateLapangan[j].ta1) tandingLain.push(stateLapangan[j].ta1);
+            if (stateLapangan[j].ta2) tandingLain.push(stateLapangan[j].ta2);
+            if (stateLapangan[j].tb1) tandingLain.push(stateLapangan[j].tb1);
+            if (stateLapangan[j].tb2) tandingLain.push(stateLapangan[j].tb2);
+        }
+    }
+
+    const available = hadir.filter(k => !tandingLain.includes(k.nama_pemain));
+    if (available.length < 4) {
+        showToast("Minimal butuh 4 pemain hadir yang sedang tidak bermain!");
+        return;
+    }
+
+    // Acak & ambil 4 pemain
+    available.sort(() => Math.random() - 0.5);
+    const p = available.slice(0, 4);
+
+    if (!stateLapangan[courtNum]) stateLapangan[courtNum] = { skorA:0, skorB:0, berjalan:false, startTime:0, accumulatedTime:0, blowoutResolved:false };
+    stateLapangan[courtNum].ta1 = p[0].nama_pemain;
+    stateLapangan[courtNum].ta2 = p[1].nama_pemain;
+    stateLapangan[courtNum].tb1 = p[2].nama_pemain;
+    stateLapangan[courtNum].tb2 = p[3].nama_pemain;
+
+    renderPapanSkor();
+    showToast("Auto Draft berhasil! ⚖️");
+}
+
+function periksaKeseimbanganCourt(courtNum) {
+    const panel = document.getElementById(`balance-court-${courtNum}`);
+    if (!panel) return;
+    const s = stateLapangan[courtNum];
+    if (!s || (!s.ta1 && !s.tb1)) { panel.innerHTML = ''; return; }
+
+    const gA1 = getGrade(s.ta1), gA2 = getGrade(s.ta2);
+    const gB1 = getGrade(s.tb1), gB2 = getGrade(s.tb2);
+    const totA = gA1 + gA2, totB = gB1 + gB2;
+    const selisih = Math.abs(totA - totB);
+
+    let html = `
+        <div style="display:flex; justify-content:space-between; font-size:11px; font-weight:700; color:#555; padding-top:4px; border-top:1px dashed #e2e8f0;">
+            <span>Team A: <b>${totA.toFixed(1)}</b></span>
+            <span style="color:${selisih > 1.5 ? '#e74c3c' : '#2ecc71'};">Selisih: <b>${selisih.toFixed(1)}</b></span>
+            <span>Team B: <b>${totB.toFixed(1)}</b></span>
+        </div>
+    `;
+
+    if (selisih > 1.5 && s.ta1 && s.ta2 && s.tb1 && s.tb2) {
+        html += `
+            <div style="background:#fef3c7; border:1px solid #fde68a; color:#b45309; padding:6px; border-radius:6px; font-size:11px; margin-top:6px;">
+                ⚠️ <b>Laga Kurang Seimbang!</b> Coba tukar pasangan.
+            </div>
+        `;
+    }
+    panel.innerHTML = html;
+}
+
+function getGrade(nama) {
+    if (!nama) return 0;
+    const g = gradingPemainList.find(x => x.nama_pemain === nama);
+    return g ? Number(g.nilai_grading) || 5.0 : 5.0;
+}
+
+function renderRiwayatMatch() {
+    const list = document.getElementById('log-riwayat');
+    if (!list) return;
+    list.innerHTML = '';
+
+    if (pertandinganList.length === 0) {
+        list.innerHTML = `<li style="font-size:12px; color:#888; text-align:center; padding:10px;">Belum ada riwayat match masuk hari ini.</li>`;
+        return;
+    }
+
+    pertandinganList.forEach(m => {
+        const timA = [m.tim_a_pemain_1, m.tim_a_pemain_2].filter(Boolean).join(" / ");
+        const timB = [m.tim_b_pemain_1, m.tim_b_pemain_2].filter(Boolean).join(" / ");
+        const cockBadge = Number(m.jumlah_shuttlecock_tambahan) > 0
+            ? `<span style="background:#dcfce7; color:#166534; font-size:10px; font-weight:800; padding:2px 8px; border-radius:9999px; border:1px solid #bbf7d0; margin-left:6px;">🏸 +${m.jumlah_shuttlecock_tambahan} Cock</span>`
+            : '';
+        const cockDetail = m.detail_pemain_cock 
+            ? `<span style="font-size:10px; color:#475569; background:#f1f5f9; padding:2px 6px; border-radius:4px; margin-left:6px;">Cock dibebankan: <b>${m.detail_pemain_cock}</b></span>`
+            : '';
+
+        const li = document.createElement('li');
+        li.className = 'history-item';
+        li.innerHTML = `
+            <div>
+                <div><b>${timA}</b> <span style="background:#e2e8f0; padding:2px 8px; border-radius:4px; margin:0 4px; font-weight:bold;">${m.skor_tim_a} : ${m.skor_tim_b}</span> <b>${timB}</b> ${cockBadge}</div>
+                <div class="history-time">⏱️ Durasi: <b>${m.durasi_menit || "00:00"} Menit</b> (Lapangan ${m.lapangan}) ${cockDetail}</div>
+            </div>
+            <div class="admin-only" style="display:flex; gap:6px;">
+                <button class="btn-edit-history" onclick="bukaModalEditMatch('${m.match_id}')">✏️</button>
+                <button style="background:none; border:none; cursor:pointer;" onclick="hapusMatchServer('${m.match_id}')">❌</button>
+            </div>
+        `;
+        list.appendChild(li);
+    });
+}
+
+function bukaModalEditMatch(id) {
+    const m = pertandinganList.find(x => x.match_id === id);
+    if (!m) return;
+
+    document.getElementById('edit-match-id').value = m.match_id;
+    document.getElementById('edit-match-tima').value = [m.tim_a_pemain_1, m.tim_a_pemain_2].filter(Boolean).join(" / ");
+    document.getElementById('edit-match-skora').value = m.skor_tim_a;
+    document.getElementById('edit-match-timb').value = [m.tim_b_pemain_1, m.tim_b_pemain_2].filter(Boolean).join(" / ");
+    document.getElementById('edit-match-skorb').value = m.skor_tim_b;
+    document.getElementById('edit-match-durasi').value = m.durasi_menit;
+    if (document.getElementById('edit-match-cock')) {
+        document.getElementById('edit-match-cock').value = m.jumlah_shuttlecock_tambahan || 0;
+    }
+    if (document.getElementById('edit-match-detail-pemain')) {
+        document.getElementById('edit-match-detail-pemain').value = m.detail_pemain_cock || '';
+    }
+
+    document.getElementById('modal-edit-match').style.display = 'flex';
+}
+function tutupModalEditMatch() {
+    document.getElementById('modal-edit-match').style.display = 'none';
+}
+
+function eksekusiSimpanEditMatch() {
+    const id = document.getElementById('edit-match-id').value;
+    const tA = document.getElementById('edit-match-tima').value.split("/").map(x => x.trim().toUpperCase());
+    const tB = document.getElementById('edit-match-timb').value.split("/").map(x => x.trim().toUpperCase());
+    const cockQty = Number(document.getElementById('edit-match-cock')?.value) || 0;
+    const detailCock = document.getElementById('edit-match-detail-pemain')?.value?.trim() || "";
+
+    const payload = {
+        match_id: id,
+        sesi_id: currentSession.sesi_id,
+        tim_a_pemain_1: tA[0] || "",
+        tim_a_pemain_2: tA[1] || "",
+        tim_b_pemain_1: tB[0] || "",
+        tim_b_pemain_2: tB[1] || "",
+        skor_tim_a: Number(document.getElementById('edit-match-skora').value) || 0,
+        skor_tim_b: Number(document.getElementById('edit-match-skorb').value) || 0,
+        durasi_menit: document.getElementById('edit-match-durasi').value.trim(),
+        jumlah_shuttlecock_tambahan: cockQty,
+        detail_pemain_cock: detailCock,
+        role: userRole
+    };
+
+    showLoading("Menyimpan perubahan match...");
+    google.script.run
+        .withSuccessHandler(function() {
+            hideLoading();
+            tutupModalEditMatch();
+            loadInitialServerData();
+            showToast("Perubahan match tersimpan! ✏️");
+        })
+        .withFailureHandler(function(err) {
+            hideLoading();
+            alert("Gagal edit match: " + err.message);
+        })
+        .editMatch(payload);
+}
+
+function hapusMatchServer(id) {
+    if (confirm("Hapus pertandingan ini dari riwayat?")) {
+        showLoading("Menghapus match...");
+        google.script.run
+            .withSuccessHandler(function() {
+                hideLoading();
+                loadInitialServerData();
+                showToast("Match berhasil dihapus.");
+            })
+            .withFailureHandler(function(err) {
+                hideLoading();
+                alert("Gagal hapus match: " + err.message);
+            })
+            .deleteMatch({ match_id: id, sesi_id: currentSession.sesi_id, role: userRole });
+    }
+}
+
+function updateLiveNavbarStatistik() {
+    const hadirCount = kehadiranList.filter(k => k.status_hadir).length;
+    const matchCount = pertandinganList.length;
+
+    let totSec = 0;
+    pertandinganList.forEach(m => {
+        if (m.durasi_menit && m.durasi_menit.includes(":")) {
+            const p = m.durasi_menit.split(":");
+            totSec += (Number(p[0]) || 0) * 60 + (Number(p[1]) || 0);
+        }
+    });
+
+    const avgSec = matchCount > 0 ? Math.floor(totSec / matchCount) : 0;
+    const avgStr = padZero(Math.floor(avgSec / 60)) + ":" + padZero(avgSec % 60);
+
+    const elHadir = document.getElementById('live-total-pemain');
+    const elMatch = document.getElementById('live-total-match');
+    const elAvg = document.getElementById('live-avg-durasi');
+
+    if (elHadir) elHadir.innerText = padZero(hadirCount);
+    if (elMatch) elMatch.innerText = padZero(matchCount);
+    if (elAvg) elAvg.innerText = avgStr;
+}
+
+// ==========================================
+// KLASEMEN KUMULATIF & ARSIP
+// ==========================================
+function renderKumulatifTable() {
+    const tbody = document.getElementById('tabel-allmatch-kumulatif');
+    if (!tbody) return;
+    tbody.innerHTML = '';
+
+    if (kumulatifList.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="10" style="color:#888; padding:20px; font-size:12px;">Belum ada data kumulatif.</td></tr>`;
+        return;
+    }
+
+    const sorted = [...kumulatifList].sort((a,b) => {
+        if (Number(b.total_poin) !== Number(a.total_poin)) return Number(b.total_poin) - Number(a.total_poin);
+        if (Number(b.total_selisih_poin) !== Number(a.total_selisih_poin)) return Number(b.total_selisih_poin) - Number(a.total_selisih_poin);
+        return a.nama_pemain.localeCompare(b.nama_pemain);
+    });
+
+    sorted.forEach((k, idx) => {
+        const spVal = Number(k.total_selisih_poin) || 0;
+        const spStr = (spVal > 0 ? '+' : '') + spVal;
+
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td><span class="pos-badge">${idx + 1}</span></td>
+            <td style="text-align: left; font-weight: 700; color:#1e293b;">${k.nama_pemain}</td>
+            <td style="text-align: left; font-weight: 700; color:#16a34a;">${k.total_hadir || 0} Sesi</td>
+            <td style="font-weight: 700;">${k.total_main || 0}</td>
+            <td style="color: #16a34a; font-weight: 700;">${k.total_menang || 0}</td>
+            <td style="color: #dc2626; font-weight: 700;">${k.total_kalah || 0}</td>
+            <td style="color: #16a34a; font-weight: 600;">${k.total_poin_menang || 0}</td>
+            <td style="color: #dc2626; font-weight: 600;">${k.total_poin_kalah || 0}</td>
+            <td style="color: #8b5cf6; font-weight: 700;">${spStr}</td>
+            <td style="color: #2563eb; font-weight: 800; font-size: 15px;">${k.total_poin || 0}</td>
+        `;
+        tbody.appendChild(tr);
+    });
+
+    // Render Arsip Riwayat Sesi
+    const arsipTbody = document.getElementById('tabel-history-sesi-harian');
+    if (!arsipTbody) return;
+    arsipTbody.innerHTML = '';
+
+    if (arsipSesiList.length === 0) {
+        arsipTbody.innerHTML = `<tr><td colspan="5" style="color:#888; padding:20px; font-size:12px;">Belum ada sesi diarsipkan.</td></tr>`;
+        return;
+    }
+
+    arsipSesiList.forEach(a => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td style="font-weight:600; color:#334155;">📅 ${a.waktu_arsip}</td>
+            <td style="font-weight:700; color:#0284c7;">${a.total_pertandingan} Pertandingan</td>
+            <td style="font-weight:700; color:#16a34a;">${a.jumlah_pemain_hadir} Orang</td>
+            <td style="font-family:monospace; font-weight:700; color:#e27c3a;">⏱️ ${a.rata_rata_waktu_main}</td>
+            <td style="font-weight:800; color:#16a34a;">Rp ${(Number(a.total_kas_masuk) || 0).toLocaleString('id-ID')}</td>
+        `;
+        arsipTbody.appendChild(tr);
+    });
+}
+
+// ==========================================
+// SELESAI SESI & RESET SISTEM
+// ==========================================
+function bukaModalSelesai() { document.getElementById('modal-selesai').style.display = 'flex'; }
+function tutupModalSelesai() { document.getElementById('modal-selesai').style.display = 'none'; }
+
+function eksekusiSelesaiHariIni() {
+    tutupModalSelesai();
+    showLoading("Mengarsipkan Sesi Mabar ke Google Sheets...");
+    google.script.run
+        .withSuccessHandler(function(res) {
+            hideLoading();
+            if (res.success) {
+                showToast("Sesi berhasil diarsipkan! 🏁");
+                loadInitialServerData();
+                gantiHalaman('page-allmatch');
+            }
+        })
+        .withFailureHandler(function(err) {
+            hideLoading();
+            alert("Gagal arsip sesi: " + err.message);
+        })
+        .archiveDailySession({ sesi_id: currentSession.sesi_id, role: userRole });
+}
+
+function bukaModalReset() { document.getElementById('modal-reset').style.display = 'flex'; }
+function tutupModalReset() { document.getElementById('modal-reset').style.display = 'none'; }
+
+function eksekusiResetServer(type) {
+    if (!confirm(`Konfirmasi: Apakah Anda yakin ingin melakukan RESET tipe [${type}]?`)) return;
+    tutupModalReset();
+    showLoading(`Menjalankan reset ${type}...`);
+    google.script.run
+        .withSuccessHandler(function() {
+            hideLoading();
+            showToast(`Reset ${type} berhasil dijalankan.`);
+            loadInitialServerData();
+        })
+        .withFailureHandler(function(err) {
+            hideLoading();
+            alert("Gagal reset: " + err.message);
+        })
+        .resetDailySession({ type: type, sesi_id: currentSession.sesi_id, role: userRole });
+}
+
+// ==========================================
+// GRADING PEMAIN & REKOMENDASI CERDAS
+// ==========================================
+function initGradingConfigUI() {
+    const container = document.getElementById('grading-config-inputs-container');
+    if (!container) return;
+    container.innerHTML = '';
+
+    configGrading.forEach((cfg, idx) => {
+        const row = document.createElement('div');
+        row.style.display = 'grid';
+        row.style.gridTemplateColumns = '1fr 60px 10px 60px';
+        row.style.gap = '6px';
+        row.style.marginBottom = '6px';
+        row.style.alignItems = 'center';
+
+        row.innerHTML = `
+            <input type="text" id="cfg-nama-${idx}" value="${cfg.nama}" style="padding:6px; border:1px solid #cbd5e1; border-radius:4px; font-size:11px; font-weight:bold;">
+            <input type="number" step="0.1" id="cfg-min-${idx}" value="${cfg.min}" style="padding:6px; border:1px solid #cbd5e1; border-radius:4px; text-align:center; font-size:11px;">
+            <span>-</span>
+            <input type="number" step="0.1" id="cfg-max-${idx}" value="${cfg.max}" style="padding:6px; border:1px solid #cbd5e1; border-radius:4px; text-align:center; font-size:11px;">
+        `;
+        container.appendChild(row);
+    });
+
+    // Populate filter level dropdown
+    const filterEl = document.getElementById('filter-grading-level');
+    if (filterEl) {
+        filterEl.innerHTML = '<option value="semua">📋 Semua Level</option>';
+        configGrading.forEach((c, idx) => {
+            filterEl.innerHTML += `<option value="${idx}">🎯 ${c.nama}</option>`;
+        });
+    }
+}
+
+function toggleGradingConfigCollapse() {
+    const c = document.getElementById('grading-config-content');
+    const ic = document.getElementById('grading-config-icon');
+    if (c.style.display === 'none') {
+        c.style.display = 'block';
+        ic.innerText = '➖';
+    } else {
+        c.style.display = 'none';
+        ic.innerText = '➕';
+    }
+}
+
+function simpanConfigGrading() {
+    configGrading.forEach((c, idx) => {
+        c.nama = document.getElementById(`cfg-nama-${idx}`).value.trim();
+        c.min = Number(document.getElementById(`cfg-min-${idx}`).value) || 0;
+        c.max = Number(document.getElementById(`cfg-max-${idx}`).value) || 0;
+    });
+
+    showLoading("Menyimpan konfigurasi grading...");
+    google.script.run
+        .withSuccessHandler(function() {
+            hideLoading();
+            showToast("Konfigurasi rentang level grading disimpan! ⚙️");
+            renderGradingTable();
+        })
+        .withFailureHandler(function(err) {
+            hideLoading();
+            alert("Gagal simpan konfigurasi: " + err.message);
+        })
+        .saveGradingConfig({ config_levels: configGrading, role: userRole });
+}
+
+function hitungKategoriBadge(nilai) {
+    const v = Number(nilai) || 0;
+    const colors = [
+        { bg: '#fee2e2', text: '#ef4444' },
+        { bg: '#eff6ff', text: '#3b82f6' },
+        { bg: '#f0fdf4', text: '#16a34a' },
+        { bg: '#f1f5f9', text: '#475569' },
+        { bg: '#fffbeb', text: '#b45309' }
+    ];
+
+    let foundIdx = configGrading.length - 1;
+    for (let i = 0; i < configGrading.length; i++) {
+        if (v >= configGrading[i].min && v <= configGrading[i].max) {
+            foundIdx = i;
+            break;
+        }
+    }
+
+    const c = colors[foundIdx] || colors[0];
+    const name = configGrading[foundIdx] ? configGrading[foundIdx].nama : 'UNKNOWN';
+    return `<span style="background:${c.bg}; color:${c.text}; padding:4px 10px; border-radius:20px; font-size:10px; font-weight:800; display:inline-block;">${name}</span>`;
+}
+
+function hitungRekomendasiGradingPemain(nama) {
+    const k = kehadiranList.find(x => x.nama_pemain === nama);
+    if (!k) return getGrade(nama);
+
+    let main = 0, menang = 0, sp = 0;
+    pertandinganList.forEach(m => {
+        const pA = [m.tim_a_pemain_1, m.tim_a_pemain_2].filter(Boolean);
+        const pB = [m.tim_b_pemain_1, m.tim_b_pemain_2].filter(Boolean);
+        const sA = Number(m.skor_tim_a) || 0, sB = Number(m.skor_tim_b) || 0;
+
+        if (pA.includes(nama)) {
+            main++;
+            if (sA > sB) menang++;
+            sp += (sA - sB);
+        } else if (pB.includes(nama)) {
+            main++;
+            if (sB > sA) menang++;
+            sp += (sB - sA);
+        }
+    });
+
+    const currentG = getGrade(nama);
+    if (main === 0) return currentG;
+
+    const winRate = menang / main;
+    const avgSP = sp / main;
+    let adj = 0;
+
+    if (winRate > 0.55 || (winRate >= 0.5 && avgSP > 1.5)) adj = 0.2;
+    else if (winRate < 0.45 || (winRate <= 0.5 && avgSP < -1.5)) adj = -0.2;
+
+    const rec = Math.max(0, Math.min(10, currentG + adj));
+    return Number(rec.toFixed(1));
+}
+
+function renderGradingTable() {
+    const tbody = document.getElementById('tabel-grading-pemain');
+    if (!tbody) return;
+    tbody.innerHTML = '';
+
+    const list = [...gradingPemainList].sort((a,b) => a.nama_pemain.localeCompare(b.nama_pemain));
+
+    list.forEach((p, idx) => {
+        const gradeVal = Number(p.nilai_grading) || 5.0;
+        const recVal = hitungRekomendasiGradingPemain(p.nama_pemain);
+        const diff = Number((recVal - gradeVal).toFixed(1));
+
+        let recHtml = `<span style="color:#94a3b8; font-size:11px; font-weight:bold;">Akurat</span>`;
+        if (Math.abs(diff) >= 0.1) {
+            const isUp = diff > 0;
+            const diffColor = isUp ? '#16a34a' : '#ef4444';
+            const arrow = isUp ? '▲' : '▼';
+            recHtml = `
+                <div style="display:flex; align-items:center; justify-content:center; gap:6px;">
+                    <span style="color:${diffColor}; font-weight:900;">${arrow} ${diff > 0 ? '+'+diff : diff}</span>
+                    <span style="background:#f0fdf4; color:#10b981; padding:2px 6px; border-radius:4px; font-size:11px; font-weight:800;">⚡ ${recVal.toFixed(1)}</span>
+                    <button class="btn-set-grade admin-only" onclick="terapkanSatuGradingServer('${p.nama_pemain}', ${recVal})">Set</button>
+                </div>
+            `;
+        }
+
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td><span class="pos-badge">${idx + 1}</span></td>
+            <td style="text-align: left; font-weight: 700; color: #1e293b;">${p.nama_pemain}</td>
+            <td style="text-align:center;">
+                <input type="number" step="0.1" min="0" max="10" value="${gradeVal.toFixed(1)}" class="admin-only grade-input-box" style="width:70px; padding:4px; text-align:center; font-weight:800; border:1px solid #cbd5e1; border-radius:4px; color:#2563eb;" onchange="updateGradingScoreServer('${p.nama_pemain}', this.value)">
+                <span class="member-only-view" style="font-weight:800; color:#2563eb;">${gradeVal.toFixed(1)}</span>
+            </td>
+            <td style="text-align:center;">${recHtml}</td>
+            <td style="text-align:center;">${hitungKategoriBadge(gradeVal)}</td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
+
+function updateGradingScoreServer(nama, val) {
+    const num = Number(val);
+    const p = gradingPemainList.find(x => x.nama_pemain === nama);
+    if (p) p.nilai_grading = num;
+
+    google.script.run
+        .withSuccessHandler(function() {
+            showToast(`Grade ${nama} diperbarui!`);
+            renderGradingTable();
+        })
+        .updateGradingScore({
+            nama_pemain: nama,
+            nilai_grading: num,
+            kategori: hitungKategoriBadge(num),
+            role: userRole
+        });
+}
+
+function terapkanSatuGradingServer(nama, recVal) {
+    updateGradingScoreServer(nama, recVal);
+}
+
+function terapkanSemuaRekomendasiGrading() {
+    if (!confirm("Terapkan seluruh rekomendasi penyesuaian grading pemain?")) return;
+    const updates = [];
+    gradingPemainList.forEach(p => {
+        const rec = hitungRekomendasiGradingPemain(p.nama_pemain);
+        if (Math.abs(rec - p.nilai_grading) >= 0.1) {
+            p.nilai_grading = rec;
+            updates.push({ nama: p.nama_pemain, grading: rec, kategori: hitungKategoriBadge(rec) });
+        }
+    });
+
+    if (updates.length === 0) {
+        showToast("Semua grading pemain sudah akurat!");
+        return;
+    }
+
+    showLoading("Menerapkan rekomendasi ke Google Sheets...");
+    google.script.run
+        .withSuccessHandler(function() {
+            hideLoading();
+            showToast(`${updates.length} grading pemain disesuaikan! ⚡`);
+            renderGradingTable();
+        })
+        .updateGradingBatch({ updates: updates, role: userRole });
+}
+
+function setFilterGradingLevel(val) {
+    filterGradingLevelAktif = val;
+    renderGradingTable();
+}
+
+// ==========================================
+// MADING (PINBOARD & GOOGLE DRIVE UPLOAD)
+// ==========================================
+function renderMading() {
+    const board = document.getElementById('mading-board-container');
+    if (!board) return;
+    board.innerHTML = '';
+
+    madingItemList.forEach(item => {
+        const card = document.createElement('div');
+        const isMin = item.type === 'crew' && item.is_minimized;
+        card.id = `mading-card-${item.mading_id}`;
+        card.className = `mading-item-card ${item.style_class || 'pin-yellow'} ${isMin ? 'minimized' : ''}`;
+        card.style.left = `${item.x || 20}px`;
+        card.style.top = `${item.y || 20}px`;
+        card.style.width = `${item.w || 250}px`;
+        if (item.h && !isMin) card.style.height = `${item.h}px`;
+        card.style.transform = `rotate(${item.rot || 0}deg)`;
+        card.style.zIndex = item.z_index || 10;
+
+        let inner = '';
+        const imgTag = item.url_gambar ? `<img src="${item.url_gambar}" class="mading-img-attachment">` : '';
+        const linkTag = item.link_url ? `<a href="${item.link_url}" target="_blank" style="display:inline-block; margin-top:8px; background:rgba(255,255,255,0.8); color:#000; padding:3px 8px; border-radius:12px; font-size:10px; font-weight:bold;">🔗 Buka Link</a>` : '';
+
+        if (item.type === 'post') {
+            inner = `<div style="font-size:${item.font_size || 13}px; white-space:pre-wrap;">${item.content || ''}</div>${linkTag}${imgTag}`;
+        } else {
+            inner = `
+                <div style="font-weight:800; font-size:${item.font_size || 14}px;">${item.nama || '-'}</div>
+                ${item.content ? `<div style="font-size:12px; margin-top:2px;"><b>Info:</b> ${item.content}</div>` : ''}
+                ${item.hp ? `<div style="font-size:12px;"><b>HP:</b> ${item.hp}</div>` : ''}
+                ${linkTag}${imgTag}
+            `;
+        }
+
+        const minBtn = item.type === 'crew' ? `<span style="cursor:pointer;" onclick="toggleMinimizeMading('${item.mading_id}')">${isMin ? '🔽' : '🔼'}</span>` : '';
+        const rotateBtn = (userRole === 'admin' && !isMadingLocked) ? `<span style="cursor:grab;" onmousedown="initRotateMading(event, '${item.mading_id}')">🔄</span>` : '';
+        const dragHandle = (userRole === 'admin' && !isMadingLocked) ? `onmousedown="initDragMading(event, '${item.mading_id}')"` : '';
+
+        card.innerHTML = `
+            <div class="mading-header-drag" ${dragHandle}>
+                <span style="font-size:12px; font-weight:800; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:80%;">📌 ${item.title || 'Mading'}</span>
+                <div style="display:flex; gap:6px; align-items:center;">
+                    ${rotateBtn}
+                    ${minBtn}
+                </div>
+            </div>
+            <div class="mading-scroll-area">
+                ${inner}
+            </div>
+        `;
+
+        board.appendChild(card);
+    });
+}
+
+function toggleLockMading() {
+    isMadingLocked = !isMadingLocked;
+    const btn = document.getElementById('btn-lock-mading');
+    if (isMadingLocked) {
+        btn.innerText = '🔒 Layout Terkunci';
+        btn.style.color = '#1e293b';
+        showToast("Layout Mading Terkunci 🔒");
+    } else {
+        btn.innerText = '🔓 Mode Edit Layout';
+        btn.style.color = '#10b981';
+        showToast("Mode Edit Mading Terbuka 🔓");
+    }
+    renderMading();
+}
+
+function bukaModalFormMading(mode, editId) {
+    document.getElementById('form-mading-mode').value = mode;
+    document.getElementById('form-mading-id').value = editId || '';
+    document.getElementById('group-mading-post').style.display = (mode === 'post') ? 'flex' : 'none';
+    document.getElementById('group-mading-crew').style.display = (mode === 'crew') ? 'flex' : 'none';
+    document.getElementById('modal-form-mading').style.display = 'flex';
+}
+function tutupModalFormMading() { document.getElementById('modal-form-mading').style.display = 'none'; }
+
+function prosesPilihGambarMading(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        document.getElementById('form-mading-img-b64').value = e.target.result.split(',')[1];
+        document.getElementById('preview-mading-img').src = e.target.result;
+        document.getElementById('preview-mading-img-container').style.display = 'block';
+    };
+    reader.readAsDataURL(file);
+}
+
+function hapusGambarPreviewMading() {
+    document.getElementById('form-mading-img-b64').value = '';
+    document.getElementById('preview-mading-img-container').style.display = 'none';
+}
+
+function eksekusiSimpanMading() {
+    const mode = document.getElementById('form-mading-mode').value;
+    const b64 = document.getElementById('form-mading-img-b64').value;
+    const styleClass = document.getElementById('form-mading-tipe').value;
+    const link = document.getElementById('form-mading-link').value.trim();
+
+    showLoading("Menyimpan kartu mading...");
+
+    function simpanKeSheets(driveUrl, driveId) {
+        const payload = {
+            type: mode,
+            title: mode === 'post' ? document.getElementById('post-mading-judul').value : document.getElementById('crew-mading-jabatan').value,
+            content: mode === 'post' ? document.getElementById('post-mading-pesan').value : document.getElementById('crew-mading-info').value,
+            nama: mode === 'crew' ? document.getElementById('crew-mading-nama').value : '',
+            hp: mode === 'crew' ? document.getElementById('crew-mading-hp').value : '',
+            style_class: styleClass,
+            link_url: link,
+            url_gambar: driveUrl || '',
+            drive_file_id: driveId || '',
+            font_size: mode === 'post' ? document.getElementById('post-mading-font-size').value : document.getElementById('crew-mading-font-size').value,
+            role: userRole
+        };
+
+        google.script.run
+            .withSuccessHandler(function() {
+                hideLoading();
+                tutupModalFormMading();
+                loadInitialServerData();
+                showToast("Kartu mading tersimpan! 📰");
+            })
+            .withFailureHandler(function(err) {
+                hideLoading();
+                alert("Gagal simpan mading: " + err.message);
+            })
+            .saveMadingPost(payload);
+    }
+
+    if (b64) {
+        // Upload ke Drive terlebih dahulu
+        google.script.run
+            .withSuccessHandler(function(uploadRes) {
+                if (uploadRes.success) {
+                    simpanKeSheets(uploadRes.url, uploadRes.fileId);
+                } else {
+                    simpanKeSheets('', '');
+                }
+            })
+            .withFailureHandler(function() {
+                simpanKeSheets('', '');
+            })
+            .uploadFileToDrive({ base64Data: b64, fileName: "mading_" + Date.now() + ".jpg", role: userRole });
+    } else {
+        simpanKeSheets('', '');
+    }
+}
+
+// ==========================================
+// EXPORT POSTER JPG & EXCEL
+// ==========================================
+function bukaModalExportGambar() { document.getElementById('modal-export-gambar').style.display = 'flex'; }
+function tutupModalExportGambar() { document.getElementById('modal-export-gambar').style.display = 'none'; }
+function bukaModalExportExcel() { document.getElementById('modal-export-excel').style.display = 'flex'; }
+function tutupModalExportExcel() { document.getElementById('modal-export-excel').style.display = 'none'; }
+function bukaModalImport() { document.getElementById('modal-import-choice').style.display = 'flex'; }
+function tutupModalImport() { document.getElementById('modal-import-choice').style.display = 'none'; }
+
+function prosesEksporGambar(jenis) {
+    const poster = document.getElementById('print-poster-container');
+    const tbody1 = document.getElementById('poster-tbody-1');
+    const tbody2 = document.getElementById('poster-tbody-2');
+
+    poster.style.display = 'block';
+    tutupModalExportGambar();
+    showLoading("Merender Poster Infografis Klasemen...");
+
+    setTimeout(() => {
+        html2canvas(poster, { backgroundColor: '#02081f', scale: 2 }).then(canvas => {
+            const link = document.createElement('a');
+            link.download = `LobSerang_${jenis}_${Date.now()}.jpg`;
+            link.href = canvas.toDataURL("image/jpeg", 0.9);
+            link.click();
+            poster.style.display = 'none';
+            hideLoading();
+            showToast("Poster Klasemen berhasil diunduh! 🖼️");
+        }).catch(err => {
+            poster.style.display = 'none';
+            hideLoading();
+            alert("Gagal render poster: " + err.message);
+        });
+    }, 400);
+}
+
+function exportHariIniExcel() {
+    showLoading("Mengekspor Laporan Excel...");
+    google.script.run
+        .withSuccessHandler(function(res) {
+            hideLoading();
+            tutupModalExportExcel();
+            const wb = XLSX.utils.book_new();
+            const ws = XLSX.utils.aoa_to_sheet(res.data);
+            XLSX.utils.book_append_sheet(wb, ws, "Rekap Harian");
+            XLSX.writeFile(wb, `LobSerang_Rekap_Harian_${res.generatedAt}.xlsx`);
+            showToast("Laporan Excel berhasil diunduh! 📊");
+        })
+        .exportData({ type: 'KAS' });
+}
+
+function exportAllKumulatifExcel() {
+    showLoading("Mengekspor Laporan Kumulatif...");
+    google.script.run
+        .withSuccessHandler(function(res) {
+            hideLoading();
+            tutupModalExportExcel();
+            const wb = XLSX.utils.book_new();
+            const ws = XLSX.utils.aoa_to_sheet(res.data);
+            XLSX.utils.book_append_sheet(wb, ws, "Kumulatif");
+            XLSX.writeFile(wb, `LobSerang_All_Kumulatif_${res.generatedAt}.xlsx`);
+            showToast("Laporan Kumulatif berhasil diunduh! 📊");
+        })
+        .exportData({ type: 'KUMULATIF' });
+}
+
+function triggerImportExcel(type) {
+    document.getElementById('import-excel-file').click();
+}
+function prosesEksekusiImportExcel(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    showToast("Fitur impor siap diproses melalui file reader.");
+    tutupModalImport();
+}
+
+// ==========================================
+// KOMPAS FLOATING D-PAD
+// ==========================================
+function startGlobalScroll(dx, dy) {
+    const target = document.querySelector('.content-body');
+    if (!target) return;
+    function step() {
+        target.scrollBy({ left: dx, top: dy, behavior: 'auto' });
+        globalScrollInterval = requestAnimationFrame(step);
+    }
+    step();
+}
+function stopGlobalScroll() {
+    if (globalScrollInterval) {
+        cancelAnimationFrame(globalScrollInterval);
+        globalScrollInterval = null;
+    }
+}
+
+// ==========================================
+// RENDER ALL
+// ==========================================
+function renderAllPanels() {
+    renderKlasemenTable();
+    renderRekapKas();
+    renderKumulatifTable();
+    renderMading();
+    renderGradingTable();
+    updateLiveNavbarStatistik();
+}
+
+function padZero(n) { return n < 10 ? '0' + n : '' + n; }
+function getJamNow() {
+    const d = new Date();
+    return padZero(d.getHours()) + ":" + padZero(d.getMinutes());
+}
+</script>

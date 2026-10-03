@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lob Serang 2 - Manajemen Member & Mabar Badminton TaheSquat</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:ital,wght@0,500;0,600;0,700;0,800;1,700&family=Inter:wght@400;500;600;700;800;900&family=Orbitron:wght@700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Rajdhani:wght@600;700&display=swap" rel="stylesheet">
+    
+    <!-- Pustaka Excel & Canvas -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+
+    <?!= include('Styles'); ?>
+</head>
+<body>
+
+<!-- SCREEN LOGIN (ADMIN / MEMBER) -->
+<div id="login-screen" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #f8f9fa; z-index: 99999; display: flex; align-items: center; justify-content: center;">
+    <div style="background: white; padding: 40px 32px; border-radius: 16px; box-shadow: 0 20px 40px rgba(0,0,0,0.1); max-width: 400px; width: 90%; text-align: center;">
+        <h1 style="font-family: 'Orbitron', sans-serif; font-size: 26px; color: #1e293b; margin-bottom: 6px;">Lob Serang 2</h1>
+        <p style="font-size: 13px; color: #64748b; margin-bottom: 25px;">Sistem Manajemen Mabar Badminton TaheSquat</p>
+        
+        <div id="login-admin-box" style="display: none; margin-bottom: 20px; text-align: left;">
+            <label style="font-size: 12px; font-weight: 700; color: #475569;">PASSWORD ADMIN</label>
+            <input type="password" id="input-admin-pass" placeholder="Masukkan password admin..." style="width: 100%; padding: 10px 14px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 14px; margin-top: 6px;">
+            <div style="display: flex; gap: 8px; margin-top: 10px;">
+                <button onclick="submitLoginAdmin()" style="flex: 1; background: #0f172a; color: white; border: none; padding: 10px; border-radius: 6px; font-weight: bold; cursor: pointer;">Masuk</button>
+                <button onclick="cancelLoginAdmin()" style="background: #e2e8f0; color: #475569; border: none; padding: 10px 14px; border-radius: 6px; font-weight: bold; cursor: pointer;">Batal</button>
+            </div>
+            <p id="login-error-msg" style="color: #ef4444; font-size: 11px; margin-top: 6px; display: none;"></p>
+        </div>
+
+        <div id="login-main-buttons">
+            <button onclick="showAdminPasswordInput()" style="display: block; width: 100%; padding: 14px; border: none; border-radius: 8px; font-weight: bold; font-size: 14px; cursor: pointer; transition: all 0.2s; margin-bottom: 12px; background: #1e293b; color: white;">🔑 Masuk sebagai Admin</button>
+            <button onclick="loginMemberMode()" style="display: block; width: 100%; padding: 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-weight: bold; font-size: 14px; cursor: pointer; transition: all 0.2s; background: #f1f5f9; color: #475569;">👁️ Masuk sebagai Member (Mode Baca)</button>
+        </div>
+    </div>
+</div>
+
+<!-- OVERLAY LOADING -->
+<div class="loading-overlay" id="loading-overlay" style="display: none; position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.7); z-index: 2000; flex-direction: column; align-items: center; justify-content: center; color: white; font-weight: bold;">
+    <div style="border: 4px solid rgba(255,255,255,0.1); width: 44px; height: 44px; border-radius: 50%; border-left-color: #2ecc71; animation: spin-pulse 1s linear infinite; margin-bottom: 12px;"></div>
+    <div id="loading-text" style="font-size: 14px; letter-spacing: 0.5px;">Memuat Data dari Google Sheets...</div>
+</div>
+
+<!-- TOAST NOTIFICATION -->
+<div id="live-toast" style="display: none; position: fixed; bottom: 20px; right: 20px; background: #1e293b; color: white; padding: 12px 24px; border-radius: 10px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); font-weight: 700; font-size: 13px; z-index: 9999; align-items: center; gap: 8px; border-left: 4px solid #10b981;">
+    <span id="toast-message">Pemberitahuan</span>
+</div>
+
+<!-- SIDEBAR NAVIGASI -->
+<div class="sidebar" id="sidebar">
+    <div class="sidebar-toggle-edge" id="sidebar-edge-toggle" onclick="toggleSidebar()">◀</div>
+    <div class="sidebar-header" style="font-family: 'Chakra Petch', 'Orbitron', 'Rajdhani', sans-serif; font-style: italic; letter-spacing: 0.08em;">
+        LOB SERANG <span style="font-size: 13px; font-weight: 700; letter-spacing: 0.1em; color: #10b981; display: block; margin-top: 4px; text-shadow: 0 0 10px rgba(16, 185, 129, 0.3);">BADMINTON SYSTEM 2.0</span>
+    </div>
+    <ul class="sidebar-menu">
+        <li id="menu-input" class="active admin-only" onclick="gantiHalaman('page-input')">
+            <span>📝</span> Registrasi Pemain
+        </li>
+        <li id="menu-match" onclick="gantiHalaman('page-match')">
+            <span>🏆</span> Klasemen & Match
+        </li>
+        <li id="menu-rekap" class="admin-only" onclick="gantiHalaman('page-rekap')">
+            <span>💰</span> Rekap Kas & Cock
+        </li>
+        <li id="menu-allmatch" onclick="gantiHalaman('page-allmatch')">
+            <span>📊</span> Klasemen All Kumulatif
+        </li>
+        <li id="menu-news" onclick="gantiHalaman('page-news')">
+            <span>📰</span> News & Update
+        </li>
+        <li id="menu-grading" class="admin-only" onclick="gantiHalaman('page-grading')">
+            <span>⭐</span> Grading Database
+        </li>
+        <li style="margin-top: 25px; padding: 0; background: transparent !important; box-shadow: none !important;">
+            <button onclick="logoutApp()" style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); color: #ef4444; padding: 12px 16px; border-radius: 8px; font-size: 13px; font-weight: bold; cursor: pointer; width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px;">🚪 Keluar (Logout)</button>
+        </li>
+    </ul>
+    <div class="sidebar-watermark">created by : TAHESQUAT Badminton System 2.0</div>
+</div>
+
+<!-- MAIN CONTENT WRAPPER -->
+<div class="main-wrapper">
+    <!-- TOP NAVBAR -->
+    <div class="top-navbar">
+        <div class="navbar-left-zone">
+            <button class="toggle-btn" onclick="toggleSidebar()">☰ Menu</button>
+            <div id="cloud-sync-indicator" class="sync-status connected">
+                <span class="sync-icon">☁️</span> <span id="sync-text">Google Sheets Tersinkron</span>
+            </div>
+        </div>
+        
+        <div class="live-score-container-center">
+            <div class="live-score-panel" id="live-score-topbar">
+                <div class="live-score-item">
+                    <span class="live-score-label">Pemain (Hadir)</span>
+                    <span class="live-score-value" id="live-total-pemain">00</span>
+                </div>
+                <div class="live-score-item">
+                    <span class="live-score-label">Total Match</span>
+                    <span class="live-score-value" id="live-total-match">00</span>
+                </div>
+                <div class="live-score-item">
+                    <span class="live-score-label">Rata2 Durasi</span>
+                    <span class="live-score-value" id="live-avg-durasi">00:00</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="floating-controls admin-only" id="action-buttons">
+            <div class="dropdown-container">
+                <button class="btn-alat" onclick="toggleDropdownAlat(event)">
+                    ⚙️ Alat & Ekspor ▾
+                </button>
+                <div class="dropdown-menu" id="dropdown-alat-menu">
+                    <button class="dropdown-item" onclick="bukaModalExportGambar()">🖼️ Unduh Klasemen (JPG Poster)</button>
+                    <button class="dropdown-item" onclick="bukaModalExportExcel()">📊 Unduh Laporan Excel (.xlsx)</button>
+                    <button class="dropdown-item" onclick="bukaModalImport()">📥 Impor Database Excel</button>
+                    <div style="height: 1px; background: #e2e8f0; margin: 4px 0;"></div>
+                    <button class="dropdown-item" onclick="bukaModalSelesai()">🏁 Selesai Sesi Harian</button>
+                    <button class="dropdown-item danger" onclick="bukaModalReset()">🔄 Reset Sistem</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CONTENT BODY PANELS -->
+    <div class="content-body">
+        
+        <!-- 1. REGISTRASI & INPUT BIAYA -->
+        <div id="page-input" class="page-panel active">
+            <h2>📝 Registrasi & Masukkan Nama Pemain</h2>
+            
+            <div class="copas-section">
+                <!-- STRUKTUR BIAYA MABAR & SHUTTLECOCK -->
+                <div class="nominal-breakdown-card">
+                    <div class="fee-field-box">
+                        <label>Biaya Lapangan / Pemain</label>
+                        <input type="number" id="biaya-lapangan-input" value="10000" oninput="kalkulasiBiayaDasar()">
+                    </div>
+                    <div class="fee-field-box">
+                        <label>Biaya Shuttlecock Dasar / Pemain</label>
+                        <input type="number" id="biaya-cock-input" value="3000" oninput="kalkulasiBiayaDasar()">
+                    </div>
+                    <div class="fee-field-box">
+                        <label>Tarif Shuttlecock Tambahan / Unit</label>
+                        <input type="number" id="tarif-cock-extra-input" value="3000">
+                    </div>
+                </div>
+
+                <div class="fee-total-calc" style="margin-bottom: 15px;">
+                    <span>🏸 Total Biaya Dasar Pemain Baru:</span>
+                    <span id="label-total-biaya-dasar" style="font-size: 16px;">Rp 13.000 (Rp 10.000 Lapangan + Rp 3.000 Shuttlecock)</span>
+                </div>
+
+                <h4>📋 Tempel Teks (Bisa 1 nama atau daftar dari WhatsApp)</h4>
+                <p style="font-size:12px; color:#64748b; margin-top:4px; margin-bottom:12px;">
+                    Ketik langsung nama pemain, atau salin daftar berangka dari WhatsApp dan tempel di sini.
+                </p>
+                <textarea id="wa-text" placeholder="Contoh 1 nama: BUDI&#10;Contoh banyak nama WhatsApp:&#10;1. BUDI&#10;2. ANDI&#10;3. CITRA"></textarea>
+                <button class="btn-process" onclick="prosesRegistrasiNama()">💾 Proses & Masukkan Pemain ke Google Sheets</button>
+            </div>
+        </div>
+
+        <!-- 2. KLASEMEN HARIAN & MATCH -->
+        <div id="page-match" class="page-panel">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; flex-wrap: wrap; gap: 10px;">
+                <h2 style="margin-bottom: 0;">🏆 Klasemen Liga & Pertandingan Hari Ini</h2>
+            </div>
+            
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width: 45px;">Pos</th>
+                            <th style="text-align: left; width: 150px;">Pemain</th>
+                            <th style="width: 140px; text-align: left;">Status Hadir</th>
+                            <th style="width: 45px;">Mp</th>
+                            <th style="width: 45px; color:#16a34a;">M</th>
+                            <th style="width: 45px; color:#dc2626;">K</th>
+                            <th style="width: 45px; color:#16a34a;" title="Poin Menang">PM</th>
+                            <th style="width: 45px; color:#dc2626;" title="Poin Kalah">PK</th>
+                            <th style="width: 50px; color:#8b5cf6;" title="Selisih Poin">SP</th>
+                            <th style="width: 65px; color:#2563eb;">Poin</th>
+                            <th style="width: 80px;" title="Rata-rata Waktu Main">Rata Waktu</th> 
+                            <th>5 Laga (Form)</th>
+                            <th style="width: 40px;" class="admin-only">Del</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabel-klasemen"></tbody>
+                </table>
+            </div>
+
+            <!-- PAPAN SKOR LAPANGAN DINAMIS -->
+            <div class="papan-skor-header-box">
+                <h3>🎚️ Papan Skor Pertandingan</h3>
+                <div class="lapangan-mini-controls admin-only">
+                    <button class="btn-ctrl-lap add" onclick="tambahLapangan()" title="Tambah Lapangan">+</button>
+                    <button class="btn-ctrl-lap rem" onclick="kurangiLapangan()" title="Kurangi Lapangan">-</button>
+                </div>
+            </div>
+
+            <div id="kontainer-lapangan" class="courts-container"></div>
+
+            <h3>📜 Riwayat Hasil Pertandingan Hari Ini</h3>
+            <ul class="history-list" id="log-riwayat"></ul>
+        </div>
+
+        <!-- 3. REKAPITULASI KAS & SHUTTLECOCK -->
+        <div id="page-rekap" class="page-panel">
+            <h2>💰 Rekapitulasi Kas & Shuttlecock</h2>
+            
+            <div class="summary-container">
+                <div class="summary-box">
+                    <div>
+                        <span style="color:#16a34a;">💵 Kas Tunai</span>
+                        <span id="total-tunai" class="summary-amount">Rp 0</span>
+                        <span id="count-tunai" style="font-size:11px; color:#475569; display:block; margin-top:2px;">(0 Orang)</span>
+                    </div>
+                    <div>
+                        <span style="color:#2563eb;">📱 QRIS / Transfer</span>
+                        <span id="total-transfer" class="summary-amount">Rp 0</span>
+                        <span id="count-transfer" style="font-size:11px; color:#475569; display:block; margin-top:2px;">(0 Orang)</span>
+                    </div>
+                    <div>
+                        <span style="color:#dc2626;">⏳ Belum Bayar</span>
+                        <span id="total-belum" class="summary-amount">Rp 0</span>
+                        <span id="count-belum" style="font-size:11px; color:#475569; display:block; margin-top:2px;">(0 Orang)</span>
+                    </div>
+                </div>
+                <div class="grand-total-box">
+                    💰 Total Kas Bersih Masuk: <span id="total-keseluruhan">Rp 0</span>
+                </div>
+                <div class="attendance-details">
+                    <span>Total Member: <b id="lbl-total-m">0</b></span>
+                    <span>Hadir Mabar: <b id="lbl-hadir-m">0</b></span>
+                    <span>Sudah Bayar: <b id="lbl-lunas-m">0</b></span>
+                    <span>Sponsor/Free: <b id="lbl-sponsor-m">0</b></span>
+                    <span>Shuttlecock Tambahan: <b id="lbl-total-cock-extra">0 Pcs</b></span>
+                </div>
+            </div>
+
+            <div class="filter-rekap-container">
+                <span class="filter-label-text">Tampilkan Data:</span>
+                <select class="dropdown-filter-kas" onchange="setFilterKas(this.value)">
+                    <option value="semua">📋 Semua Anggota Sesi</option>
+                    <option value="sudah">🟢 Sudah Bayar (Lunas/Sponsor)</option>
+                    <option value="belum">🔴 Belum Bayar</option>
+                    <option value="tunai">💵 Pembayaran Tunai</option>
+                    <option value="tf">📱 Pembayaran QRIS / Transfer</option>
+                    <option value="sponsor">🤝 Free / Sponsor</option>
+                </select>
+            </div>
+
+            <ul class="member-list" id="rekap-kas-list"></ul>
+
+            <!-- TABEL RINCIAN SHUTTLECOCK TAMBAHAN PER MATCH ID -->
+            <div class="shuttlecock-match-section" style="margin-top: 30px; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
+                    <div>
+                        <h3 style="margin: 0; color: #1e293b; font-size: 16px; display: flex; align-items: center; gap: 8px;">
+                            <span>🏸</span> Tabel Rincian Shuttlecock Tambahan per Match ID
+                        </h3>
+                        <p style="margin: 3px 0 0; font-size: 11px; color: #64748b;">
+                            Setiap pemakaian shuttlecock tambahan dicatat per match_id dan otomatis terintegrasi ke tagihan pemain di atas.
+                        </p>
+                    </div>
+                    <span id="badge-total-cock-match" style="background: #ecfdf5; color: #065f46; border: 1px solid #a7f3d0; font-weight: 800; font-size: 11px; padding: 4px 12px; border-radius: 9999px;">
+                        0 Shuttlecock Terintegrasi
+                    </span>
+                </div>
+
+                <div class="table-container" style="margin-bottom: 0;">
+                    <table>
+                        <thead>
+                            <tr style="background: #f8fafc; font-size: 11px; text-transform: uppercase;">
+                                <th style="width: 40px; text-align: center;">No</th>
+                                <th style="width: 120px; text-align: left;">Match ID</th>
+                                <th style="width: 75px; text-align: center;">Lap</th>
+                                <th style="text-align: left; min-width: 180px;">Partai Pertandingan</th>
+                                <th style="width: 90px; text-align: center; color: #059669;">Cock Extra</th>
+                                <th style="text-align: left; min-width: 200px;">Pemain yang Dibebankan</th>
+                                <th style="width: 110px; text-align: right;">Tarif / Cock</th>
+                                <th style="width: 120px; text-align: right;">Subtotal</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabel-shuttlecock-match">
+                            <tr>
+                                <td colspan="8" style="text-align: center; padding: 20px; color: #94a3b8; font-size: 12px;">
+                                    Belum ada data shuttlecock tambahan yang tercatat pada pertandingan hari ini.
+                                </td>
+                            </tr>
+                        </tbody>
+                        <tfoot id="tfoot-shuttlecock-match" style="display: none;">
+                            <tr style="background: #f8fafc; font-weight: 800; border-top: 2px solid #e2e8f0; font-size: 12px;">
+                                <td colspan="4" style="text-align: right; text-transform: uppercase; font-size: 11px;">Total Rangkuman:</td>
+                                <td id="lbl-tfoot-total-cock" style="text-align: center; color: #065f46;">0 Cock</td>
+                                <td colspan="2" style="text-align: right; text-transform: uppercase; font-size: 11px;">Total Tagihan Cock:</td>
+                                <td id="lbl-tfoot-total-rupiah" style="text-align: right; color: #059669;">Rp 0</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. KLASEMEN ALL KUMULATIF & ARSIP SESI -->
+        <div id="page-allmatch" class="page-panel">
+            <h2>📊 Klasemen All Kumulatif</h2>
+            <p style="font-size:12px; color:#64748b; margin-bottom:15px; margin-top:-15px;">
+                *Data ini memuat rangkuman kehadiran dan performa pemain yang diarsipkan secara permanen di sheet <b>Klasemen_Kumulatif</b>.
+            </p>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width: 50px;">Pos</th>
+                            <th style="width: 180px; text-align: left;">Pemain</th>
+                            <th style="width: 110px; text-align: left;">Hadir</th>
+                            <th style="width: 50px;">Mp</th>
+                            <th style="width: 50px; color:#16a34a;">M</th>
+                            <th style="width: 50px; color:#dc2626;">K</th>
+                            <th style="width: 55px; color:#16a34a;">PM</th>
+                            <th style="width: 55px; color:#dc2626;">PK</th>
+                            <th style="width: 55px; color:#8b5cf6;">SP</th>
+                            <th style="width: 65px; color:#2563eb;">Poin</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabel-allmatch-kumulatif"></tbody>
+                </table>
+            </div>
+
+            <h3 style="margin-top: 40px;">📅 Arsip Riwayat Sesi Harian</h3>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr style="background-color: #f1f5f9;">
+                            <th>Waktu Arsip</th>
+                            <th>Total Pertandingan</th>
+                            <th>Jumlah Pemain Hadir</th>
+                            <th>Rata-rata Waktu Main</th>
+                            <th>Total Kas Masuk</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabel-history-sesi-harian"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- 5. NEWS & UPDATE (MADING PINBOARD) -->
+        <div id="page-news" class="page-panel">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #edf2f7; padding-bottom: 15px; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
+                <div>
+                    <h2 style="margin: 0; border: none; padding: 0;">📰 News & Update</h2>
+                    <p style="font-size: 13px; color: #64748b; margin-top: 6px; font-weight: 500;">
+                        Upload photos ke Google Drive, Update Event, Info News, Link Share, dll.
+                    </p>
+                </div>
+                <div class="admin-only" style="display: flex; gap: 10px;">
+                    <button class="btn-modern" id="btn-lock-mading" onclick="toggleLockMading()">🔒 Layout Terkunci</button>
+                    <button class="btn-modern" onclick="bukaModalFormMading('crew')">➕ Tambah Crew</button>
+                    <button class="btn-modern" onclick="bukaModalFormMading('post')">➕ Tambah Post</button>
+                </div>
+            </div>
+
+            <div class="mading-board-wrapper" id="mading-board-container"></div>
+        </div>
+
+        <!-- 6. GRADING & KUALITAS PEMAIN -->
+        <div id="page-grading" class="page-panel">
+            <h2>⭐ Grading & Kualitas Pemain Database</h2>
+            
+            <div id="smart-grading-notifications" style="margin-bottom: 15px;"></div>
+            
+            <!-- Pengaturan Range Kategori -->
+            <div style="margin-bottom: 15px; border-radius: 8px; border: 1px solid #3b82f6; overflow: hidden; background: #ffffff;">
+                <button onclick="toggleGradingConfigCollapse()" style="width: 100%; display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; border: none; background: #eff6ff; color: #1e3a8a; font-weight: 800; font-size: 12px; cursor: pointer;">
+                    <span>⚙️ Pengaturan Nama & Range Kategori Level</span>
+                    <span id="grading-config-icon">➕</span>
+                </button>
+                
+                <div id="grading-config-content" style="display: none; padding: 14px; border-top: 1px solid rgba(59, 130, 246, 0.2);">
+                    <div id="grading-config-inputs-container"></div>
+                    <button onclick="simpanConfigGrading()" style="margin-top: 10px; width: 100%; background: #2563eb; color: white; border: none; padding: 10px; border-radius: 6px; font-weight: bold; font-size: 12px; cursor: pointer;">💾 Simpan ke Google Sheets</button>
+                </div>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span style="font-size:12px; font-weight:800; color:#475569;">Filter Level:</span>
+                    <select id="filter-grading-level" onchange="setFilterGradingLevel(this.value)" style="padding: 6px 12px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 12px; font-weight: 700; color: #1e293b; background: white; cursor: pointer;">
+                        <option value="semua">📋 Semua Level</option>
+                    </select>
+                </div>
+                
+                <div style="display: flex; gap: 8px; align-items: center;">
+                    <p style="font-size:11px; color:#64748b; margin: 0; max-width: 250px; text-align: right; line-height: 1.2;">
+                        *Rekomendasi dihitung dinamis berdasarkan klasemen harian mabar hari ini.
+                    </p>
+                    <button onclick="terapkanSemuaRekomendasiGrading()" style="background: linear-gradient(135deg, #00b4db, #0083b0); border: none; color: white; padding: 8px 14px; border-radius: 6px; font-weight: 700; font-size: 11px; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 4px 10px rgba(0, 180, 219, 0.25);">
+                        ⚡ Terapkan Semua
+                    </button>
+                </div>
+            </div>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width: 45px;">Pos</th>
+                            <th style="text-align: left; width: 180px;">Nama Anggota</th>
+                            <th style="width: 150px; text-align:center;">Grading Skor</th>
+                            <th style="width: 160px; text-align:center;">Rekomendasi</th>
+                            <th style="width: 140px; text-align:center;">Kategori Level</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabel-grading-pemain"></tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- KOMPAS D-PAD FLOATING -->
+    <div id="floating-compass" class="floating-compass-widget">
+        <div style="grid-column: 2; grid-row: 1;"><button class="compass-btn" onmousedown="startGlobalScroll(0,-20)" onmouseup="stopGlobalScroll()" onmouseleave="stopGlobalScroll()">▲</button></div>
+        <div style="grid-column: 1; grid-row: 2;"><button class="compass-btn" onmousedown="startGlobalScroll(-20,0)" onmouseup="stopGlobalScroll()" onmouseleave="stopGlobalScroll()">◀</button></div>
+        <div style="grid-column: 2; grid-row: 2; display:flex; align-items:center; justify-content:center; opacity:0.25; font-size:18px; color:#333; pointer-events:none;">✛</div>
+        <div style="grid-column: 3; grid-row: 2;"><button class="compass-btn" onmousedown="startGlobalScroll(20,0)" onmouseup="stopGlobalScroll()" onmouseleave="stopGlobalScroll()">▶</button></div>
+        <div style="grid-column: 2; grid-row: 3;"><button class="compass-btn" onmousedown="startGlobalScroll(0,20)" onmouseup="stopGlobalScroll()" onmouseleave="stopGlobalScroll()">▼</button></div>
+    </div>
+</div>
+
+<!-- ============================================================== -->
+<!-- MODAL-MODAL INTERAKTIF -->
+<!-- ============================================================== -->
+
+<!-- MODAL EXPORT POSTER JPG -->
+<div class="modal-overlay" id="modal-export-gambar">
+    <div class="modal-box">
+        <h3>🖼️ Unduh Klasemen (Gambar JPG)</h3>
+        <p>Silakan pilih jenis klasemen yang ingin diekspor menjadi poster infografis JPG resolusi tinggi:</p>
+        <div class="choice-container">
+            <button class="btn-choice choice-green" onclick="prosesEksporGambar('hari-ini')">
+                <h4>🟢 Klasemen Hari Ini (Gambar)</h4>
+                <p>Ekspor gambar visual klasemen mabar yang berlangsung hari ini.</p>
+            </button>
+            <button class="btn-choice choice-blue" onclick="prosesEksporGambar('kumulatif')">
+                <h4>🔵 Klasemen Kumulatif All-Time (Gambar)</h4>
+                <p>Ekspor gambar visual akumulasi performa seluruh sesi mabar historis.</p>
+            </button>
+        </div>
+        <div class="modal-actions">
+            <button class="btn-modal cancel" onclick="tutupModalExportGambar()">Batal</button>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL EXPORT EXCEL -->
+<div class="modal-overlay" id="modal-export-excel">
+    <div class="modal-box">
+        <h3>📊 Unduh Laporan Excel</h3>
+        <p>Silakan pilih jenis laporan data yang ingin diekspor ke file .xlsx:</p>
+        <div class="choice-container">
+            <button class="btn-choice choice-green" onclick="exportHariIniExcel()">
+                <h4>🟢 Rekap Aktivitas Hari Ini</h4>
+                <p>Ekspor semua nama terinput, jam kehadiran, jumlah main, rincian biaya lapangan & shuttlecock tambahan, serta nominal kas.</p>
+            </button>
+            <button class="btn-choice choice-blue" onclick="exportAllKumulatifExcel()">
+                <h4>🔵 Rekap All Kumulatif</h4>
+                <p>Ekspor keseluruhan data historis kumulatif pemain dan riwayat arsip mabar.</p>
+            </button>
+        </div>
+        <div class="modal-actions">
+            <button class="btn-modal cancel" onclick="tutupModalExportExcel()">Tutup</button>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL IMPOR EXCEL -->
+<div class="modal-overlay" id="modal-import-choice">
+    <div class="modal-box">
+        <h3>📥 Impor Database</h3>
+        <p>Silakan pilih jenis data yang ingin Anda impor:</p>
+        <div class="choice-container">
+            <button class="btn-choice choice-blue" onclick="triggerImportExcel('kumulatif')">
+                <h4>🔵 Impor Klasemen Kumulatif</h4>
+                <p>Impor riwayat kehadiran, MP, M, K, Poin ke sheet Klasemen_Kumulatif.</p>
+            </button>
+            <button class="btn-choice choice-orange" onclick="triggerImportExcel('grading')">
+                <h4>⭐ Impor Database Grading</h4>
+                <p>Impor massal untuk memperbarui Nama dan Nilai Grade pemain.</p>
+            </button>
+        </div>
+        <div class="modal-actions">
+            <button class="btn-modal cancel" onclick="tutupModalImport()">Batal</button>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL SELESAI SESI -->
+<div class="modal-overlay" id="modal-selesai">
+    <div class="modal-box">
+        <h3>🏁 Selesai Sesi Hari Ini?</h3>
+        <p>Klasemen harian, status kehadiran harian, dan durasi tanding akan diarsipkan permanen ke sheet <b>Arsip_Sesi_Harian</b> dan diakumulasikan ke <b>Klasemen_Kumulatif</b>.</p>
+        <p style="font-size:12px; color:#16a34a; font-weight:700;">*Data kas dan rekap shuttlecock juga akan disimpan aman.</p>
+        <div class="modal-actions">
+            <button class="btn-modal confirm" onclick="eksekusiSelesaiHariIni()">Ya, Arsipkan Sesi</button>
+            <button class="btn-modal cancel" onclick="tutupModalSelesai()">Batal</button>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL RESET SISTEM -->
+<div class="modal-overlay" id="modal-reset">
+    <div class="modal-box">
+        <h3>🔄 Opsi Reset Data</h3>
+        <p>Tentukan data yang ingin dibersihkan:</p>
+        <div class="choice-container">
+            <button class="btn-choice choice-orange" onclick="eksekusiResetServer('hari-ini')">
+                <h4>🟠 Reset Data Hari Ini Saja</h4>
+                <p>Menghapus registrasi nama pemain harian, absensi, dan riwayat match hari ini.</p>
+            </button>
+            <button class="btn-choice choice-red" onclick="eksekusiResetServer('kumulatif')">
+                <h4>🔴 Reset Data Kumulatif</h4>
+                <p>Menghapus data Klasemen Kumulatif & Arsip Sesi.</p>
+            </button>
+            <button class="btn-choice choice-red" style="background:#fef2f2;" onclick="eksekusiResetServer('grading')">
+                <h4>⭐ Reset Database Grading</h4>
+                <p>Mengosongkan database grading pemain.</p>
+            </button>
+        </div>
+        <div class="modal-actions">
+            <button class="btn-modal cancel" onclick="tutupModalReset()">Batal</button>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL EDIT MATCH -->
+<div class="modal-overlay" id="modal-edit-match">
+    <div class="modal-box">
+        <h3>✏️ Edit Data Pertandingan</h3>
+        <input type="hidden" id="edit-match-id">
+        <div class="integrated-edit-form">
+            <label>NAMA TIM A (Pemain 1 & Pemain 2 pisahkan dengan / )</label>
+            <input type="text" id="edit-match-tima" placeholder="CONTOH: BUDI / ANDI">
+            <label>SKOR TIM A</label>
+            <input type="number" id="edit-match-skora" min="0">
+            <div style="height:1px; background:#e2e8f0; margin:5px 0;"></div>
+            <label>NAMA TIM B (Pemain 1 & Pemain 2 pisahkan dengan / )</label>
+            <input type="text" id="edit-match-timb" placeholder="CONTOH: EDI / IWAN">
+            <label>SKOR TIM B</label>
+            <input type="number" id="edit-match-skorb" min="0">
+            <label>DURASI BERMAIN (Menit:Detik)</label>
+            <input type="text" id="edit-match-durasi" placeholder="15:30">
+            <div style="height:1px; background:#e2e8f0; margin:5px 0;"></div>
+            <label>🏸 SHUTTLECOCK TAMBAHAN MATCH (PCS)</label>
+            <input type="number" id="edit-match-cock" min="0" value="0">
+            <label>BEBANKAN COCK KE PEMAIN (PISAHKAN TANDA KOMA)</label>
+            <input type="text" id="edit-match-detail-pemain" placeholder="CONTOH: BUDI, ANDI">
+        </div>
+        <div class="modal-actions">
+            <button class="btn-modal confirm blue" onclick="eksekusiSimpanEditMatch()">Simpan Perubahan</button>
+            <button class="btn-modal cancel" onclick="tutupModalEditMatch()">Batal</button>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL FORM MADING & DRIVE UPLOAD -->
+<div class="modal-overlay" id="modal-form-mading">
+    <div class="modal-box">
+        <h3 id="modal-form-mading-title">📝 Form Mading</h3>
+        <input type="hidden" id="form-mading-id">
+        <input type="hidden" id="form-mading-mode">
+        
+        <div class="integrated-edit-form">
+            <div>
+                <label>TEMA KARTU</label>
+                <select id="form-mading-tipe">
+                    <option value="pin-yellow">📌 Catatan Kuning</option>
+                    <option value="pin-blue">📌 Catatan Biru</option>
+                    <option value="pin-green">📌 Catatan Hijau</option>
+                    <option value="pin-purple">📌 Catatan Ungu</option>
+                    <option value="pin-crew">👤 Badge Crew (Dark)</option>
+                    <option value="pin-sponsor">💎 Banner Sponsor (Gold)</option>
+                </select>
+            </div>
+
+            <div id="group-mading-post" style="display:none; flex-direction:column; gap:12px;">
+                <div style="display:grid; grid-template-columns: 2fr 1fr; gap:10px;">
+                    <div>
+                        <label>JUDUL PENGUMUMAN</label>
+                        <input type="text" id="post-mading-judul" placeholder="Judul / Tema">
+                    </div>
+                    <div>
+                        <label>UKURAN FONT (px)</label>
+                        <input type="number" id="post-mading-font-size" value="13" min="10" max="40">
+                    </div>
+                </div>
+                <div>
+                    <label>PESAN / DESKRIPSI</label>
+                    <textarea id="post-mading-pesan" placeholder="Tuliskan isi informasi di sini..."></textarea>
+                </div>
+            </div>
+
+            <div id="group-mading-crew" style="display:none; flex-direction:column; gap:12px;">
+                <div style="display:grid; grid-template-columns: 2fr 1fr; gap:10px;">
+                    <div>
+                        <label>JABATAN (ROLE)</label>
+                        <input type="text" id="crew-mading-jabatan" placeholder="Contoh: Admin 1">
+                    </div>
+                    <div>
+                        <label>UKURAN FONT (px)</label>
+                        <input type="number" id="crew-mading-font-size" value="14" min="10" max="40">
+                    </div>
+                </div>
+                <div>
+                    <label>NAMA LENGKAP</label>
+                    <input type="text" id="crew-mading-nama" placeholder="Contoh: Budi Santoso">
+                </div>
+                <div>
+                    <label>INFORMASI</label>
+                    <input type="text" id="crew-mading-info" placeholder="Contoh: Penanggung Jawab Event">
+                </div>
+                <div>
+                    <label>HP (Kontak WhatsApp)</label>
+                    <input type="text" id="crew-mading-hp" placeholder="Contoh: 0812-3456-7890">
+                </div>
+            </div>
+
+            <div>
+                <label>LINK TAUTAN (Opsional)</label>
+                <input type="text" id="form-mading-link" placeholder="https:// (Link Google Drive, WA, dll)">
+            </div>
+            <div>
+                <label>UNGGAH GAMBAR KE GOOGLE DRIVE (Opsional)</label>
+                <input type="file" id="form-mading-file" accept="image/*" style="padding: 6px;" onchange="prosesPilihGambarMading(event)">
+                <input type="hidden" id="form-mading-img-b64">
+                <input type="hidden" id="form-mading-drive-id">
+                <div id="preview-mading-img-container" style="display:none; margin-top:8px;">
+                    <img id="preview-mading-img" src="" style="max-height:80px; border-radius:4px; border:1px solid #ccc;">
+                    <button onclick="hapusGambarPreviewMading()" style="font-size:11px; padding:4px 8px; background:none; border:none; color:#ef4444; cursor:pointer; font-weight:bold;">Hapus Gambar</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal-actions">
+            <button class="btn-modal confirm red" id="btn-hapus-mading" style="display:none; margin-right: auto;" onclick="hapusMadingItemServer()">Hapus</button>
+            <button class="btn-modal cancel" onclick="tutupModalFormMading()">Batal</button>
+            <button class="btn-modal confirm blue" onclick="eksekusiSimpanMading()">Simpan</button>
+        </div>
+    </div>
+</div>
+
+<!-- POSTER INFOGRAFIS HIDDEN CONTAINER (UNTUK KONVERSI KE JPG OLEH HTML2CANVAS) -->
+<div id="print-poster-container">
+    <div class="poster-header">
+        <div class="poster-logo-text">LOB SERANG 2</div>
+        <div class="poster-sub-title">LEADERBOARD FINAL MABAR BADMINTON TAHESQUAT</div>
+        <div class="poster-session" id="poster-title-session">SESI MABAR</div><br>
+        <div class="poster-date-badge" id="poster-date">Updated: -</div>
+    </div>
+
+    <div class="podium-container">
+        <div class="podium-box p-2">
+            <div class="podium-rank-badge">2</div>
+            <div class="podium-content">
+                <div class="pod-name" id="pod-name-2">-</div>
+                <div class="pod-pts" id="pod-pts-2">0 Poin</div>
+                <div class="pod-sp" id="pod-sp-2">SP 0</div>
+            </div>
+        </div>
+        <div class="podium-box p-1">
+            <div class="podium-rank-badge">1</div>
+            <div class="podium-content">
+                <div class="pod-name" id="pod-name-1">-</div>
+                <div class="pod-pts" id="pod-pts-1">0 Poin</div>
+                <div class="pod-sp" id="pod-sp-1">SP 0</div>
+            </div>
+        </div>
+        <div class="podium-box p-3">
+            <div class="podium-rank-badge">3</div>
+            <div class="podium-content">
+                <div class="pod-name" id="pod-name-3">-</div>
+                <div class="pod-pts" id="pod-pts-3">0 Poin</div>
+                <div class="pod-sp" id="pod-sp-3">SP 0</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="stats-summary-row">
+        <div class="stat-card"><div class="stat-icon">👥</div><div class="stat-text"><div>Total Pemain:</div><span id="stat-total">0</span></div></div>
+        <div class="stat-card"><div class="stat-icon">⭐</div><div class="stat-text"><div>Poin Tertinggi:</div><span id="stat-poin">0</span></div></div>
+        <div class="stat-card"><div class="stat-icon">📈</div><div class="stat-text"><div>Selisih Terbaik:</div><span id="stat-sp">0</span></div></div>
+        <div class="stat-card"><div class="stat-icon">📅</div><div class="stat-text"><div>Top Kehadiran:</div><span id="stat-hadir">0 Sesi</span></div></div>
+    </div>
+
+    <div class="poster-tables-wrapper">
+        <div class="poster-table-col">
+            <table class="poster-table">
+                <thead><tr><th>Pos</th><th style="text-align:left;">Pemain</th><th>Hadir</th><th>MP</th><th>M</th><th>K</th><th>PM</th><th>PK</th><th>SP</th><th>Poin</th></tr></thead>
+                <tbody id="poster-tbody-1"></tbody>
+            </table>
+        </div>
+        <div class="poster-table-col">
+            <table class="poster-table">
+                <thead><tr><th>Pos</th><th style="text-align:left;">Pemain</th><th>Hadir</th><th>MP</th><th>M</th><th>K</th><th>PM</th><th>PK</th><th>SP</th><th>Poin</th></tr></thead>
+                <tbody id="poster-tbody-2"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="poster-footer">
+        ◎ MP = Jumlah Match &nbsp; ◎ M = Menang &nbsp; ◎ K = Kalah &nbsp; ◎ PM = Poin Menang &nbsp; ◎ PK = Poin Kalah &nbsp; ◎ SP = Selisih Poin
+    </div>
+</div>
+
+<input type="file" id="import-excel-file" accept=".xlsx, .xls" style="display:none;" onchange="prosesEksekusiImportExcel(event)">
+
+<?!= include('Scripts'); ?>
+</body>
+</html>
