@@ -460,7 +460,6 @@ export const MatchView: React.FC<MatchViewProps> = ({
               <th className="py-3 px-2 w-14 text-[#B2DCE5]">SP</th>
               <th className="py-3 px-2 w-16 text-[#F8B700]">Poin</th>
               <th className="py-3 px-2 w-20">Rata Waktu</th>
-              <th className="py-3 px-2">5 Laga (Form)</th>
               {userRole === 'admin' && <th className="py-3 px-2 w-10">Del</th>}
             </tr>
           </thead>
@@ -517,24 +516,6 @@ export const MatchView: React.FC<MatchViewProps> = ({
                   <td className="py-2.5 px-2 font-black text-[#013A40]">{spStr}</td>
                   <td className="py-2.5 px-2 font-black text-[#038C8C] text-sm tabular-nums">{p.poin}</td>
                   <td className="py-2.5 px-2 font-mono font-bold text-[#013A40]/70">{avgStr}</td>
-                  <td className="py-2.5 px-2">
-                    {p.form.length > 0 ? (
-                      <div className="flex gap-1 justify-center">
-                        {p.form.slice(-5).map((f, fIdx) => (
-                          <span
-                            key={fIdx}
-                            className={`w-4 h-4 rounded-xs text-[10px] font-black text-white flex items-center justify-center ${
-                              f === 'M' ? 'bg-[#038C8C]' : 'bg-red-500'
-                            }`}
-                          >
-                            {f}
-                          </span>
-                        ))}
-                      </div>
-                    ) : (
-                      <span className="text-slate-300">-</span>
-                    )}
-                  </td>
                   {userRole === 'admin' && (
                     <td className="py-2.5 px-2">
                       <button

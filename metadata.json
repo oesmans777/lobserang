@@ -2,5 +2,7 @@
   "name": "Lob Serang 2 - Badminton Management TaheSquat",
   "description": "Aplikasi manajemen member, mabar, kas, shuttlecock, papan skor live, klasemen, grading, dan mading terintegrasi Google Apps Script & Google Sheets.",
   "requestFramePermissions": [],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
 }
